@@ -89,3 +89,9 @@
 #2. Postman
 
 #3. Using endpoints?
+
+#Venv is needed for the module to work
+from pycoingecko import CoinGeckoAPI
+cg = CoinGeckoAPI()
+
+print(cg.get_price(ids='bitcoin', vs_currencies='usd'))

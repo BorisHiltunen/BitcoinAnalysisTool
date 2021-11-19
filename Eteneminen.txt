@@ -1,0 +1,8 @@
+19.11.2021
+
+9.20 Ongelma?
+> Latasin CoinGeckoAPIN -> pip install pycoingecko
+-> Ja tuli tämmönen varotus
+WARNING: The script normalizer.exe is installed in
+'C:\Users\Hiltbor\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.9_qbz5n2kfra8p0\LocalCache\local-packages\Python39\Scripts' which is not on PATH.
+Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.

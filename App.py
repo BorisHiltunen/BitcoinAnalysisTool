@@ -70,6 +70,8 @@
 
 #Code starts here!
 
+#Venv is needed for the module to work
+
 #How to get the data:
 from pycoingecko import CoinGeckoAPI
 cg = CoinGeckoAPI()
@@ -91,20 +93,11 @@ print(point)
 #Check in what form date is
 #Day-Month-Year or Month-Day-Year
 
+#
 #History on a particular day
-#data = cg.get_coin_history_by_id(id='bitcoin',date='10-11-2020', localization='false')
+data = cg.get_coin_history_by_id(id='bitcoin',date='14-12-2020',vs_currency='eur', localization='false')
 #data2 = cg.get_price(ids='bitcoin', vs_currencies='eur')
-#print(data)
+print(data)
 
-<<<<<<< HEAD
-#3. Using endpoints?
-
-#Venv is needed for the module to work
-from pycoingecko import CoinGeckoAPI
-cg = CoinGeckoAPI()
-
-print(cg.get_price(ids='bitcoin', vs_currencies='usd'))
-=======
 #History on a number of days in a row
 #cg.get_coin_market_chart_by_id(id='bitcoin',vs_currency='eur',days='3')
->>>>>>> b071254f66e737d7d18cd8f0a1130f1b8df4eeb8

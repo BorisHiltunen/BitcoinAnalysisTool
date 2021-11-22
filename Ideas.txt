@@ -1,0 +1,10 @@
+How to use
+
+On Virtual Studio Code 
+> Need to change settings to allow running fof the codes in VSC terminal
+
+Or
+
+On CMD
+> Depending on the python version
+-> python App.py or py -3.10 -m App

@@ -12,15 +12,17 @@
 #● Allow the user of your application to pass the start and end dates of the date range in some way,
 #e.g. via input fields in a UI or as parameters to an API.
 
-#How many days is the longest bearish (downward) trend within a given date range?
+#A. How many days is the longest bearish (downward) trend within a given date range?
 #● Definition of a downward trend shall be: “Price of day N is lower than price of day N-1”
 #● Expected output: The maximum amount of days bitcoin’s price was decreasing in a row.
 #Example: In bitcoin’s historical data from CoinGecko, the price decreased 3 days in a row for the
 #inputs from 2020-01-19 and to 2020-01-21, and the price decreased for 5 days in a row for the
 #inputs from 2020-03-01 and to 2021-08-01.
+
 #B. Which date within a given date range had the highest trading volume?
 #● Expected output: The date with the highest trading volume and the volume on that day in
 #euros.
+
 #C. Scrooge has access to Gyro Gearloose’s newest invention, a time machine. Scrooge
 #wants to use the time machine to profit from bitcoin. The application should be able to tell
 #for a given date range, the best day for buying bitcoin, and the best day for selling the
@@ -69,25 +71,32 @@
 #Code starts here!
 
 #How to get the data:
+from pycoingecko import CoinGeckoAPI
+cg = CoinGeckoAPI()
 
-#1. with scraping the information:
+#missions
+#1. downward trend
+#2. Highest trading volume
+#3. Time machine
 
-#import urllib
+day = 0
+month = 0
+year = 0
+point = f"{day}-{month}-{year}"
+#Test
+print(point)
 
-#link = "http://www.python.org"
-#f = urllib.urlopen(link)
-#myfile = f.read()
-#print(myfile)
+#note
 
-#import urllib.request
+#Check in what form date is
+#Day-Month-Year or Month-Day-Year
 
-#with urllib.request.urlopen("http://www.python.org") as url:
-    #s = url.read()
-    # I'm guessing this would output the html source code ?
-    #print(s)
+#History on a particular day
+#data = cg.get_coin_history_by_id(id='bitcoin',date='10-11-2020', localization='false')
+#data2 = cg.get_price(ids='bitcoin', vs_currencies='eur')
+#print(data)
 
-#2. Postman
-
+<<<<<<< HEAD
 #3. Using endpoints?
 
 #Venv is needed for the module to work
@@ -95,3 +104,7 @@ from pycoingecko import CoinGeckoAPI
 cg = CoinGeckoAPI()
 
 print(cg.get_price(ids='bitcoin', vs_currencies='usd'))
+=======
+#History on a number of days in a row
+#cg.get_coin_market_chart_by_id(id='bitcoin',vs_currency='eur',days='3')
+>>>>>>> b071254f66e737d7d18cd8f0a1130f1b8df4eeb8

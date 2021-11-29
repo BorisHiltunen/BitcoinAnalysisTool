@@ -73,6 +73,8 @@
 #Venv is needed for the module to work
 
 #How to get the data:
+import datetime
+from datetime import date
 from pycoingecko import CoinGeckoAPI
 cg = CoinGeckoAPI()
 
@@ -88,16 +90,75 @@ point = f"{day}-{month}-{year}"
 #Test
 print(point)
 
-#note
+class Application:
+    def __init__(self):
+        pass
+    def time(self):
+        pass
+    def processTime(self, date):
+        pass
+    #Maybe not needed
+    def getDays(self, start: str, finish: str):
+        year1 = f"{start[6]}{start[7]}{start[8]}{start[9]}"
+        year2 = f"{finish[6]}{finish[7]}{finish[8]}{finish[9]}"
+        month1 = f"{start[3]}{start[4]}"
+        month2 = f"{finish[3]}{finish[4]}"
+        day1 = f"{start[0]}{start[1]}"
+        day2 = f"{finish[0]}{finish[1]}"
 
-#Check in what form date is
-#Day-Month-Year or Month-Day-Year
+        d1 = date(int(year1), int(month1), int(day1))
+        d2 = date(int(year2), int(month2), int(day2))
+        minus = d1 - d2
+        amount = ""
+        if str(minus)[0] == "-":
+            for letter in str(minus):
+                if letter == "d":
+                    break
+                elif letter == "-":
+                    continue
+                else:
+                    amount = amount + letter
+        #+1 since the first day counts too
+        return int(amount) + 1
 
-#
-#History on a particular day
-data = cg.get_coin_history_by_id(id='bitcoin',date='14-12-2020',vs_currency='eur', localization='false')
-#data2 = cg.get_price(ids='bitcoin', vs_currencies='eur')
-print(data)
+    def correctFormForDatetime(self, date):
+        year = f"{date[6]}{date[7]}{date[8]}{date[9]}"
+        month = f"{date[3]}{date[4]}"
+        day = f"{date[0]}{date[1]}"
+        #is tuple and should be integer?
+        return int(year), int(month), int(day)
 
-#History on a number of days in a row
-#cg.get_coin_market_chart_by_id(id='bitcoin',vs_currency='eur',days='3')
+    def correctFormForCrypto(self, year, month, day):
+        return f"{day}-{month}-{year}"
+
+    def correctDateForm(self, date):
+        new_date = str(date)
+        year = f"{new_date[0]}{new_date[1]}{new_date[2]}{new_date[3]}"
+        month = f"{new_date[5]}{new_date[6]}"
+        day = f"{new_date[8]}{new_date[9]}"
+
+        correctForm = f"{day}-{month}-{year}"
+        return correctForm
+
+    def getData(self, start: str, finish: str, date: str):
+
+        #start_date = datetime.date(2020, 1, 1)
+        #end_date = datetime.date(2020, 1, 4)
+        #delta = datetime.timedelta(days=1)
+
+        start_date = datetime.date(self.correctFormForDatetime(start))
+        end_date = datetime.date(self.correctFormForDatetime(finish))
+        delta = datetime.timedelta(days=1)
+
+        while start_date <= end_date:
+            print(start_date)
+            #print(self.correctDateForm(start_date))
+            start_date += delta
+            data = cg.get_coin_history_by_id(id='bitcoin',date=self.correctDateForm(start_date))
+            print(data["market_data"]["current_price"]["eur"])
+
+if __name__ == "__main__":
+    app = Application()
+    app.getData("01-12-2020", "03-12-2020", "01-12-2020")
+    #print(app.getDays("13-07-2020", "24-07-2020"))
+    #print(app.correctDateForm("2020-01-04"))

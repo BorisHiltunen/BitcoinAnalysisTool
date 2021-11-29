@@ -142,23 +142,57 @@ class Application:
 
     def getData(self, start: str, finish: str, date: str):
 
+        list1 = []
+        list2 = []
+
         #start_date = datetime.date(2020, 1, 1)
         #end_date = datetime.date(2020, 1, 4)
         #delta = datetime.timedelta(days=1)
 
-        start_date = datetime.date(self.correctFormForDatetime(start))
-        end_date = datetime.date(self.correctFormForDatetime(finish))
+        start_date = datetime.date(self.correctFormForDatetime(start)[0], self.correctFormForDatetime(start)[1], self.correctFormForDatetime(start)[2])
+        end_date = datetime.date(self.correctFormForDatetime(finish)[0], self.correctFormForDatetime(finish)[1], self.correctFormForDatetime(finish)[2])
         delta = datetime.timedelta(days=1)
 
         while start_date <= end_date:
-            print(start_date)
-            #print(self.correctDateForm(start_date))
+            print(self.correctDateForm(start_date))
             start_date += delta
             data = cg.get_coin_history_by_id(id='bitcoin',date=self.correctDateForm(start_date))
             print(data["market_data"]["current_price"]["eur"])
+            list1.append(data["market_data"]["current_price"]["eur"])
+        print(list1)
+
+    def getData2(self, year1, month1, day1, year2, month2, day2):
+
+        list1 = []
+        list2 = []
+        list3 = []
+        count = 0
+
+        start_date = datetime.date(year1, month1, day1)
+        end_date = datetime.date(year2, month2, day2)
+        delta = datetime.timedelta(days=1)
+
+        while start_date <= end_date:
+            print(self.correctDateForm(start_date))
+            start_date += delta
+            data = cg.get_coin_history_by_id(id='bitcoin',date=self.correctDateForm(start_date))
+            print(data["market_data"]["current_price"]["eur"])
+            list1.append(data["market_data"]["current_price"]["eur"])
+        
+        #think how to do this
+        while count < len(list1):
+            if list1[count] > list1[count+1] and count < len(list1):
+                list2.append(list1[count+1])
+            else:
+                list3.append(len(list2))
+
+
 
 if __name__ == "__main__":
     app = Application()
     app.getData("01-12-2020", "03-12-2020", "01-12-2020")
+    start = (2020, 1, 1)
+    finish = (2020, 1, 4)
+    app.getData2(2020, 1, 1, 2020, 1, 4)
     #print(app.getDays("13-07-2020", "24-07-2020"))
     #print(app.correctDateForm("2020-01-04"))

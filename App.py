@@ -399,6 +399,12 @@ class Application:
                 highest = volume[1]
         return highest
 
+    def whenToBuyAndSell1(self, start, finish):
+        pass
+    def whenToBuyAndSell2(self, year1, month1, day1, year2, month2, day2):
+        date1 = self.correctFormForCrypto2(day1, month1, year1)
+        date2 = self.correctFormForCrypto2(day2, month2, year2)
+
 if __name__ == "__main__":
     app = Application()
     #app.getDownwardTrend1("01-12-2020", "03-12-2020")
@@ -420,3 +426,5 @@ if __name__ == "__main__":
     #print(data)
     #print(app.getDownwardTrend3(timestamp1, timestamp2))
     #print(app.getDownwardTrend4(2021, 11, 29, 2021, 11, 30))
+    app.whenToBuyAndSell1(stime, stime2)
+    app.whenToBuyAndSell1(2021, 11, 29, 2021, 11, 30)

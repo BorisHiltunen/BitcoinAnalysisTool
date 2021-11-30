@@ -78,6 +78,11 @@ from datetime import date
 from pycoingecko import CoinGeckoAPI
 cg = CoinGeckoAPI()
 
+#Correct way to use datetime date delta
+#start_date = datetime.date(2020, 1, 1)
+#end_date = datetime.date(2020, 1, 4)
+#delta = datetime.timedelta(days=1)
+
 #missions
 #1. downward trend
 #2. Highest trading volume
@@ -88,7 +93,7 @@ month = 0
 year = 0
 point = f"{day}-{month}-{year}"
 #Test
-print(point)
+#print(point)
 
 class Application:
     def __init__(self):
@@ -131,6 +136,11 @@ class Application:
     def correctFormForCrypto(self, year, month, day):
         return f"{day}-{month}-{year}"
 
+    def correctFormForCrypto2(self, day, month, year):
+        stime = f"{day}/{month}/{year}"
+        timestamp = datetime.datetime.strptime(stime, "%d/%m/%Y").timestamp()
+        return timestamp
+
     def correctDateForm(self, date):
         new_date = str(date)
         year = f"{new_date[0]}{new_date[1]}{new_date[2]}{new_date[3]}"
@@ -140,32 +150,69 @@ class Application:
         correctForm = f"{day}-{month}-{year}"
         return correctForm
 
-    def getData(self, start: str, finish: str, date: str):
+#!1!
+
+    #Downward trend
+    def getDownwardTrend1(self, start: str, finish: str):
 
         list1 = []
         list2 = []
-
-        #start_date = datetime.date(2020, 1, 1)
-        #end_date = datetime.date(2020, 1, 4)
-        #delta = datetime.timedelta(days=1)
+        list3 = []
+        list4 = []
+        count = 0
 
         start_date = datetime.date(self.correctFormForDatetime(start)[0], self.correctFormForDatetime(start)[1], self.correctFormForDatetime(start)[2])
         end_date = datetime.date(self.correctFormForDatetime(finish)[0], self.correctFormForDatetime(finish)[1], self.correctFormForDatetime(finish)[2])
         delta = datetime.timedelta(days=1)
 
         while start_date <= end_date:
-            print(self.correctDateForm(start_date))
+            #print(self.correctDateForm(start_date))
             start_date += delta
             data = cg.get_coin_history_by_id(id='bitcoin',date=self.correctDateForm(start_date))
-            print(data["market_data"]["current_price"]["eur"])
+            #print(data["market_data"]["current_price"]["eur"])
             list1.append(data["market_data"]["current_price"]["eur"])
-        print(list1)
+        
+        #print("1")
+        #print(list1)
 
-    def getData2(self, year1, month1, day1, year2, month2, day2):
+        while count < len(list1)-1:
+            if count == len(list1):
+                if list1[count-1] > list1[count]:
+                    list2.append(list1[count])
+                else:
+                    #print(count)
+                    #print(list2)
+                    list3.append(len(list2))
+                    list4.append((count, list2))
+                    list2 = []
+            else:
+                if list1[count] > list1[count+1] and count < len(list1):
+                    if list1[count] not in list2:
+                        list2.append(list1[count])
+                    list2.append(list1[count+1])
+                else:
+                    #print(count)
+                    #print(list2)
+                    list3.append(len(list2))
+                    list4.append((count, list2))
+                    list2 = []
+            count += 1
+        #print("1")
+        #print(list1)
+        #print("2")
+        #print(list2)
+        #print("3")
+        #print(list3)
+        #print(list4)
+        
+
+    #Downward trend
+    def getDownwardTrend2(self, year1, month1, day1, year2, month2, day2):
 
         list1 = []
         list2 = []
         list3 = []
+        list4 = []
         count = 0
 
         start_date = datetime.date(year1, month1, day1)
@@ -173,26 +220,203 @@ class Application:
         delta = datetime.timedelta(days=1)
 
         while start_date <= end_date:
-            print(self.correctDateForm(start_date))
+            #print(self.correctDateForm(start_date))
             start_date += delta
             data = cg.get_coin_history_by_id(id='bitcoin',date=self.correctDateForm(start_date))
-            print(data["market_data"]["current_price"]["eur"])
+            #print(data["market_data"]["current_price"]["eur"])
             list1.append(data["market_data"]["current_price"]["eur"])
         
-        #think how to do this
-        while count < len(list1):
-            if list1[count] > list1[count+1] and count < len(list1):
-                list2.append(list1[count+1])
+        #print("1")
+        #print(list1)
+
+        while count < len(list1)-1:
+            if count == len(list1):
+                if list1[count-1] > list1[count]:
+                    list2.append(list1[count])
+                else:
+                    #print(count)
+                    #print(list2)
+                    list3.append(len(list2))
+                    list4.append((count, list2))
+                    list2 = []
             else:
-                list3.append(len(list2))
+                if list1[count] > list1[count+1] and count < len(list1):
+                    if list1[count] not in list2:
+                        list2.append(list1[count])
+                    list2.append(list1[count+1])
+                else:
+                    #print(count)
+                    #print(list2)
+                    list3.append(len(list2))
+                    list4.append((count, list2))
+                    list2 = []
+            count += 1
+        #print("1")
+        #print(list1)
+        #print("2")
+        #print(list2)
+        #print("3")
+        #print(list3)
+        #print(list4)
 
+#!2!
 
+    #Downward trend
+    def getDownwardTrend3(self, start, finish):
+
+        list1 = []
+        list2 = []
+        list3 = []
+        list4 = []
+        list5 = []
+        count = 0
+        most = 0
+
+        data = cg.get_coin_market_chart_range_by_id(id='bitcoin', vs_currency='eur', from_timestamp=start, to_timestamp=finish)
+        for price in data["prices"]:
+            list1.append(price[1])
+
+        while count < len(list1)-1:
+            if count == len(list1):
+                if list1[count-1] > list1[count]:
+                    list2.append(list1[count])
+                else:
+                    #print(count)
+                    #print(list2)
+                    list3.append(len(list2))
+                    list4.append((count, list2))
+                    list5.append((len(list2), "-1", list2))
+                    list2 = []
+            else:
+                if list1[count] > list1[count+1] and count < len(list1):
+                    if list1[count] not in list2:
+                        list2.append(list1[count])
+                    list2.append(list1[count+1])
+                else:
+                    #print(count)
+                    #print(list2)
+                    list3.append(len(list2))
+                    list4.append((count, list2))
+                    list5.append((len(list2), "-1", list2))
+                    list2 = []
+            count += 1
+
+        #print("1")
+        #rint(list1)
+        #print("2")
+        #print(list2)
+        #print("3")
+        #print(list3)
+        #print("4")
+        #print(list4)
+        #print("5")
+        #print(list5)
+
+        for quantity in list3:
+            if quantity > most:
+                most = quantity
+        return most
+
+    #Downward trend
+    def getDownwardTrend4(self, year1, month1, day1, year2, month2, day2):
+
+        list1 = []
+        list2 = []
+        list3 = []
+        list4 = []
+        list5 = []
+        count = 0
+        most = 0
+
+        date1 = self.correctFormForCrypto2(day1, month1, year1)
+        date2 = self.correctFormForCrypto2(day2, month2, year2)
+
+        data = cg.get_coin_market_chart_range_by_id(id='bitcoin', vs_currency='eur', from_timestamp=date1, to_timestamp=date2)
+        for price in data["prices"]:
+            list1.append(price[1])
+        
+        while count < len(list1)-1:
+            if count == len(list1):
+                if list1[count-1] > list1[count]:
+                    list2.append(list1[count])
+                else:
+                    #print(count)
+                    #print(list2)
+                    list3.append(len(list2))
+                    list4.append((count, list2))
+                    list5.append((len(list2), list2))
+                    list2 = []
+            else:
+                if list1[count] > list1[count+1] and count < len(list1):
+                    if list1[count] not in list2:
+                        list2.append(list1[count])
+                    list2.append(list1[count+1])
+                else:
+                    #print(count)
+                    #print(list2)
+                    list3.append(len(list2))
+                    list4.append((count, list2))
+                    list5.append((len(list2), list2))
+                    list2 = []
+            count += 1
+
+        #print("1")
+        #print(list1)
+        #print("2")
+        #print(list2)
+        #print("3")
+        #print(list3)
+        #print("4")
+        #print(list4)
+        #print("5")
+        #print(list5)
+
+        for quantity in list3:
+            if quantity > most:
+                most = quantity
+        return most
+
+    def getHighestTradingVolume(self, start, finish):
+
+        highest = 0
+
+        data = cg.get_coin_market_chart_range_by_id(id='bitcoin', vs_currency='eur', from_timestamp=start, to_timestamp=finish)
+        for volume in data["total_volumes"]:
+            if volume[1] > highest:
+                highest = volume[1]
+        return highest
+    
+    def getHighestTradingVolume2(self, year1, month1, day1, year2, month2, day2):
+
+        date1 = self.correctFormForCrypto2(day1, month1, year1)
+        date2 = self.correctFormForCrypto2(day2, month2, year2)
+
+        highest = 0
+
+        data = cg.get_coin_market_chart_range_by_id(id='bitcoin', vs_currency='eur', from_timestamp=date1, to_timestamp=date2)
+        for volume in data["total_volumes"]:
+            if volume[1] > highest:
+                highest = volume[1]
+        return highest
 
 if __name__ == "__main__":
     app = Application()
-    app.getData("01-12-2020", "03-12-2020", "01-12-2020")
+    #app.getDownwardTrend1("01-12-2020", "03-12-2020")
     start = (2020, 1, 1)
     finish = (2020, 1, 4)
-    app.getData2(2020, 1, 1, 2020, 1, 4)
+    #app.getDownwardTrend2(2020, 1, 1, 2020, 1, 15)
     #print(app.getDays("13-07-2020", "24-07-2020"))
     #print(app.correctDateForm("2020-01-04"))
+    #app.getHighestTradingVolume("01-12-2020", "03-12-2020")
+    #app.getHighestTradingVolume2(2020, 1, 1, 2020, 1, 15)
+    stime = "29/11/2021"
+    stime2 = "30/11/2021"
+    timestamp1 = datetime.datetime.strptime(stime, "%d/%m/%Y").timestamp()
+    timestamp2 = datetime.datetime.strptime(stime2, "%d/%m/%Y").timestamp()
+    #print(app.getHighestTradingVolume(timestamp1, timestamp2))
+    #print(app.getHighestTradingVolume2(2021, 11, 29, 2021, 11, 30))
+    #data = cg.get_coin_market_chart_range_by_id(id='bitcoin', vs_currency='eur', from_timestamp=timestamp1, to_timestamp=timestamp2)
+    #data = cg.get_coin_market_chart_range_by_id(id='bitcoin', vs_currency='eur', from_timestamp='1577836800', to_timestamp='1609376400')
+    #print(data)
+    #print(app.getDownwardTrend3(timestamp1, timestamp2))
+    #print(app.getDownwardTrend4(2021, 11, 29, 2021, 11, 30))

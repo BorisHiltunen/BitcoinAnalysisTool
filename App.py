@@ -88,6 +88,16 @@ cg = CoinGeckoAPI()
 #2. Highest trading volume
 #3. Time machine
 
+#IMPORTANT
+#1 day from query time = 5 minute interval data
+#1 - 90 days from query time = hourly data
+#above 90 days from query time = daily data (00:00 UTC)
+
+#1 hour = 3600
+#day = 86400
+#week = 604800
+#month = 2629743
+
 day = 0
 month = 0
 year = 0
@@ -130,6 +140,10 @@ class Application:
         year = f"{date[6]}{date[7]}{date[8]}{date[9]}"
         month = f"{date[3]}{date[4]}"
         day = f"{date[0]}{date[1]}"
+        #is tuple and should be integer?
+        return int(year), int(month), int(day)
+
+    def correctFormForDatetime2(self, day, month, year):
         #is tuple and should be integer?
         return int(year), int(month), int(day)
 
@@ -399,11 +413,113 @@ class Application:
                 highest = volume[1]
         return highest
 
+    #remember to add 1 hour to the to_timestamp
     def whenToBuyAndSell1(self, start, finish):
         pass
     def whenToBuyAndSell2(self, year1, month1, day1, year2, month2, day2):
+
+        list1 = []
+        list2 = []
+        list3 = []
+        count = 0
+        most = 0
+        sum = 0
+
         date1 = self.correctFormForCrypto2(day1, month1, year1)
         date2 = self.correctFormForCrypto2(day2, month2, year2)
+
+        data = cg.get_coin_market_chart_range_by_id(id='bitcoin', vs_currency='eur', from_timestamp=date1, to_timestamp=date2)
+        for price in data["prices"]:
+            list1.append(price[1])
+        
+        while count < len(list1)-1:
+            if count == len(list1):
+                if list1[count-1] > list1[count]:
+                    list2.append(list1[count])
+                else:
+                    for price in list2:
+                        sum += price
+                    list3.append(sum)
+                    list2 = []
+                    sum = 0
+            else:
+                if list1[count] > list1[count+1] and count < len(list1):
+                    if list1[count] not in list2:
+                        list2.append(list1[count])
+                    list2.append(list1[count+1])
+                else:
+                    for price in list2:
+                        sum += price
+                    list3.append(sum)
+                    list2 = []
+                    sum = 0
+            count += 1
+
+        #print("1")
+        #print(list1)
+        #print("2")
+        #print(list2)
+        #print("3")
+        #print(list3)
+
+        for amount in list3:
+            if amount > most:
+                most = amount
+        return most
+    def whenToBuyAndSell3(self, start, finish):
+        pass
+
+    #if more than 6 days +1 hour
+    def whenToBuyAndSell4(self, year1, month1, day1, year2, month2, day2):
+
+        list1 = []
+        list2 = []
+        list3 = []
+        list4 = []
+        count = 0
+
+        date1 = self.correctFormForCrypto2(day1, month1, year1)
+        date2 = self.correctFormForCrypto2(day2, month2, year2)
+
+        #date3 = (day1, month1, year1)
+        date3 = f"{day1}.{month1}.{year1}"
+
+        #Think how to get the dates for the prices
+
+        data = cg.get_coin_market_chart_range_by_id(id='bitcoin', vs_currency='eur', from_timestamp=date1, to_timestamp=date2)
+        for price in data["prices"]:
+            list1.append(price[1])
+
+        while count < len(list1)-1:
+            if count == len(list1):
+                if list1[count-1] > list1[count]:
+                    list2.append(list1[count])
+                else:
+                    list3.append(len(list2))
+                    list4.append((count, list2))
+                    list2 = []
+            else:
+                if count == 24:
+                    pass
+                    #if day1 > 
+                    #date3 = f"{day1}.{month1}.{year1}"
+                    #self.correctFormForDatetime2(day1, month1, year1)
+                if list1[count] > list1[count+1] and count < len(list1):
+                    if list1[count] not in list2:
+                        list2.append(list1[count])
+                    list2.append(list1[count+1])
+                else:
+                    list3.append(len(list2))
+                    list4.append((count, list2))
+                    list2 = []
+            count += 1
+        #print("1")
+        #print(list1)
+        #print("2")
+        #print(list2)
+        #print("3")
+        #print(list3)
+        #print(list4)
 
 if __name__ == "__main__":
     app = Application()
@@ -415,16 +531,29 @@ if __name__ == "__main__":
     #print(app.correctDateForm("2020-01-04"))
     #app.getHighestTradingVolume("01-12-2020", "03-12-2020")
     #app.getHighestTradingVolume2(2020, 1, 1, 2020, 1, 15)
-    stime = "29/11/2021"
+
+    #IMPORTANT
+    #if stime = "30/10/2021"
+    # and stime2 = "30/11/2021"
+    #data shows 747 hours 
+    #Meaning there are 3 too many
+    #and now its 21 a clock so does that matter?
+
+    #btw it seems that every week there is one hour more
+    #why?
+    #IMPORTANT
+
+    stime = "30/10/2021"
     stime2 = "30/11/2021"
     timestamp1 = datetime.datetime.strptime(stime, "%d/%m/%Y").timestamp()
     timestamp2 = datetime.datetime.strptime(stime2, "%d/%m/%Y").timestamp()
     #print(app.getHighestTradingVolume(timestamp1, timestamp2))
     #print(app.getHighestTradingVolume2(2021, 11, 29, 2021, 11, 30))
-    #data = cg.get_coin_market_chart_range_by_id(id='bitcoin', vs_currency='eur', from_timestamp=timestamp1, to_timestamp=timestamp2)
+    data = cg.get_coin_market_chart_range_by_id(id='bitcoin', vs_currency='eur', from_timestamp=timestamp1, to_timestamp=timestamp2)
     #data = cg.get_coin_market_chart_range_by_id(id='bitcoin', vs_currency='eur', from_timestamp='1577836800', to_timestamp='1609376400')
-    #print(data)
+    print(len(data["prices"]))
     #print(app.getDownwardTrend3(timestamp1, timestamp2))
     #print(app.getDownwardTrend4(2021, 11, 29, 2021, 11, 30))
-    app.whenToBuyAndSell1(stime, stime2)
-    app.whenToBuyAndSell1(2021, 11, 29, 2021, 11, 30)
+    #app.whenToBuyAndSell1(stime, stime2)
+    #app.whenToBuyAndSell2(2021, 11, 29, 2021, 11, 30)
+    #app.whenToBuyAndSell3("01-12-2020", "03-12-2020")

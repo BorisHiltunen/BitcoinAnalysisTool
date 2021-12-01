@@ -154,18 +154,8 @@ class Application:
         timestamp = datetime.strptime(stime, "%d/%m/%Y").timestamp()
         return timestamp
 
-    def correctFormForCrypto3(self, date):
-
-        year = f"{date[6]}{date[7]}{date[8]}{date[9]}"
-        month = f"{date[3]}{date[4]}"
-        day = f"{date[0]}{date[1]}"
-
-        stime = f"{day}/{month}/{year}"
-        timestamp = datetime.strptime(stime, "%d/%m/%Y").timestamp()
-        return timestamp
-
     def convertTimestampToDate(self, timestamp):
-        #print(timestamp)
+        print(timestamp)
         dt_object = datetime.fromtimestamp(timestamp)
         return dt_object
 
@@ -457,7 +447,7 @@ class Application:
                     list2 = []
                     sum = 0
             else:
-                if list1[count] > list1[count+1]:
+                if list1[count] > list1[count+1] and count < len(list1):
                     if list1[count] not in list2:
                         list2.append(list1[count])
                     list2.append(list1[count+1])
@@ -480,25 +470,31 @@ class Application:
             if amount > most:
                 most = amount
         return most
-    def whenToBuyAndSell3(self, start: str, finish:str):
+    def whenToBuyAndSell3(self, start, finish):
+        pass
+
+    #if more than 6 days +1 hour
+    def whenToBuyAndSell4(self, year1, month1, day1, year2, month2, day2):
 
         list1 = []
         list2 = []
         list3 = []
+        list4 = []
+        list5 = []
         count = 0
-        most = (0, 0)
+        most = 0
         sum = 0
 
         now = datetime.now()
 
-        date1 = self.correctFormForCrypto3(start)
-        date2 = self.correctFormForCrypto3(finish)
+        date1 = self.correctFormForCrypto2(day1, month1, year1)
+        date2 = self.correctFormForCrypto2(day2, month2, year2)
         if date2 != now.strftime("%d-%b-%Y (%H:%M:%S.%f)"):
             date2 += 3600
-        date3 = self.correctFormForCrypto3(start)
+        date3 = self.correctFormForCrypto2(day1, month1, year1)
 
-        #print(date3)
-        #print(self.convertTimestampToDate(date3))
+        print(date3)
+        print(self.convertTimestampToDate(date3))
 
         #hours_added = datetime.timedelta(hours = hours)
         #future_date_and_time = date3 + hours_added
@@ -517,35 +513,32 @@ class Application:
             if count == len(list1)-1:
                 if list1[count-1] > list1[count]:
                     list2.append(list1[count])
-                    date3 = date3 + 3600.0
-                    list3.append((date3, sum))
+                    list3.append(len(list2))
+                    list4.append((count, list2))
+                    list5.append((date3, sum))
                     list2 = []
-                    sum = 0
+                    date3 = date3 + 3600.0
                 else:
-                    for price in list2:
-                        sum += price
-                    date3 = date3 + 3600.0
-                    list3.append((date3, sum))
+                    list3.append(len(list2))
+                    list4.append((count, list2))
                     list2 = []
-                    sum = 0
+                    date3 = date3 + 3600.0
             else:
                 if list1[count] > list1[count+1]:
                     if list1[count] not in list2:
                         list2.append(list1[count])
                     list2.append(list1[count+1])
                 else:
-                    for price in list2:
-                        sum += price
-                    list3.append((date3, sum))
+                    list3.append(len(list2))
+                    list4.append((count, list2))
                     list2 = []
-                    sum = 0
             date3 = date3 + 3600.0
             count += 1
 
-        #print(len(list1))
-        #print(date3)
-        #print(date3 - date2)
-        #print(self.convertTimestampToDate(date3))
+        print(len(list1))
+        print(date3)
+        print(date3 - date2)
+        print(self.convertTimestampToDate(date3))
 
         #print("1")
         #print(list1)
@@ -553,278 +546,7 @@ class Application:
         #print(list2)
         #print("3")
         #print(list3)
-
-        for amount in list3:
-            #print(amount)
-            print(self.convertTimestampToDate(amount[0]))
-            print(amount[1])
-            if amount[1] > most[1]:
-                most = amount
-        return (self.convertTimestampToDate(most[0]), most[1])
-
-    #if more than 6 days +1 hour
-    def whenToBuyAndSell4(self, year1, month1, day1, year2, month2, day2):
-
-        list1 = []
-        list2 = []
-        list3 = []
-        count = 0
-        most = (0, 0, 0, 0, 0)
-        sum = 0
-
-        now = datetime.now()
-
-        date1 = self.correctFormForCrypto2(day1, month1, year1)
-        date2 = self.correctFormForCrypto2(day2, month2, year2)
-        if date2 != now.strftime("%d-%b-%Y (%H:%M:%S.%f)"):
-            date2 += 3600
-        date3 = self.correctFormForCrypto2(day1, month1, year1)
-
-        #print(date3)
-        #print(self.convertTimestampToDate(date3))
-
-        #hours_added = datetime.timedelta(hours = hours)
-        #future_date_and_time = date3 + hours_added
-        #print(future_date_and_time)
-        #print(date3)
-        #print(hours_added)
-        #print(future_date_and_time)
-
-        #Think how to get the dates for the prices
-
-        number = 0
-
-        data = cg.get_coin_market_chart_range_by_id(id='bitcoin', vs_currency='eur', from_timestamp=date1, to_timestamp=date2)
-        for price in data["prices"]:
-            list1.append(price[1])
-
-        while count < len(list1):
-            if count == len(list1)-1:
-                if list1[count-1] < list1[count]:
-                    list2.append(list1[count])
-                    date3 = date3 + 3600.0
-                    list3.append(tuple(("sell", date3, sum)))
-                    list2 = []
-                    sum = 0
-                else:
-                    for price in list2:
-                        if number == 0:
-                            sum += price
-                        elif number == len(list2)-1:
-                            sum = price - sum
-                        number += 1
-                        
-                    date3 = date3 + 3600.0
-                    list3.append(tuple(("sell", date3, sum)))
-                    list2 = []
-                    sum = 0
-                    number = 0
-            else:
-                if list1[count] > list1[count+1]:
-                    if list1[count] not in list2:
-                        list2.append(list1[count])
-                        list3.append(tuple(("buy", date3, sum)))
-                    list2.append(list1[count+1])
-                else:
-                    for price in list2:
-                        if number == 0:
-                            sum += price
-                        elif number == len(list2)-1:
-                            sum = price - sum
-                            print(sum)
-                        number += 1
-
-                    list3.append(tuple(("sell", date3, sum)))
-                    list2 = []
-                    number = 0
-                    sum = 0
-            date3 = date3 + 3600.0
-            count += 1
-
-        #print(len(list1))
-        #print(date3)
-        #print(date3 - date2)
-        #print(self.convertTimestampToDate(date3))
-
-        #print("1")
-        #print(list1)
-        #print("2")
-        #print(list2)
-        #print("3")
-        #print(list3)
-
-        this_one = (0, 0, 0)
-
-        for amount in list3:
-            #print(amount)
-            #print(self.convertTimestampToDate(amount[0]))
-            #print(amount[2])
-            if amount[0] == "buy":
-                this_one = amount
-            if amount[2] > most[4]:
-                most = (this_one[0], this_one[1], amount[0], amount[1], amount[2])
-                print(most[0], self.convertTimestampToDate(most[1]), most[2], self.convertTimestampToDate(most[3]), most[4])
-        return (most[0], self.convertTimestampToDate(most[1]), most[2], self.convertTimestampToDate(most[3]), most[4])
-
-    #Vaan upward trend
-    def whenToBuyAndSell5(self, year1, month1, day1, year2, month2, day2):
-
-        list1 = []
-        list2 = []
-        list3 = []
-        count = 0
-        most = (0, 0, 0, 0, 0)
-        sum = 0
-        number = 0
-
-        now = datetime.now()
-        date1 = self.correctFormForCrypto2(day1, month1, year1)
-        date2 = self.correctFormForCrypto2(day2, month2, year2)
-
-        if date2 != now.strftime("%d-%b-%Y (%H:%M:%S.%f)"):
-            date2 += 3600
-
-        date3 = self.correctFormForCrypto2(day1, month1, year1)
-        data = cg.get_coin_market_chart_range_by_id(id='bitcoin', vs_currency='eur', from_timestamp=date1, to_timestamp=date2)
-
-        for price in data["prices"]:
-            list1.append(price[1])
-
-        #while count < len(list1):
-        #    if count == len(list1)-1:
-        #        pass
-        #    else:
-        #        if list1[count-1] > list1[count]:
-        #            pass
-        #    count += 1
-
-        while count < len(list1):
-            if count == len(list1)-1:
-                if list1[count-1] < list1[count]:
-                    list2.append(list1[count])
-                    date3 = date3 + 3600.0
-                    list3.append(tuple(("sell", date3, sum)))
-                    list2 = []
-                    sum = 0
-                else:
-                    for price in list2:
-                        if number == 0:
-                            sum += price
-                        elif number == len(list2)-1:
-                            sum = price - sum
-                        number += 1
-                        
-                    date3 = date3 + 3600.0
-                    list3.append(tuple(("sell", date3, sum)))
-                    list2 = []
-                    sum = 0
-                    number = 0
-            else:
-                if list1[count] < list1[count+1]:
-                    if list1[count] not in list2:
-                        list2.append(list1[count])
-                        list3.append(tuple(("buy", date3, sum)))
-                    list2.append(list1[count+1])
-                else:
-                    for price in list2:
-                        if number == 0:
-                            sum += price
-                        elif number == len(list2)-1:
-                            sum = price - sum
-                            print(sum)
-                        number += 1
-
-                    list3.append(tuple(("sell", date3, sum)))
-                    list2 = []
-                    number = 0
-                    sum = 0
-            date3 = date3 + 3600.0
-            count += 1
-
-        this_one = (0, 0, 0)
-
-        for amount in list3:
-            if amount[0] == "buy":
-                this_one = amount
-            if amount[2] > most[4]:
-                most = (this_one[0], this_one[1], amount[0], amount[1], amount[2])
-                print(most[0], self.convertTimestampToDate(most[1]), most[2], self.convertTimestampToDate(most[3]), most[4])
-        return (most[0], self.convertTimestampToDate(most[1]), most[2], self.convertTimestampToDate(most[3]), most[4])
-
-    def whenToBuyAndSell6(self, year1, month1, day1, year2, month2, day2):
-
-        list1 = []
-        list2 = []
-        count = 0
-        most = (0, 0, 0, 0, 0)
-        sum = 0
-        number = 0
-
-        now = datetime.now()
-        date1 = self.correctFormForCrypto2(day1, month1, year1)
-        date2 = self.correctFormForCrypto2(day2, month2, year2)
-
-        if date2 != now.strftime("%d-%b-%Y (%H:%M:%S.%f)"):
-            date2 += 3600
-
-        date3 = self.correctFormForCrypto2(day1, month1, year1)
-        date4 = self.correctFormForCrypto2(day1, month1, year1)
-        data = cg.get_coin_market_chart_range_by_id(id='bitcoin', vs_currency='eur', from_timestamp=date1, to_timestamp=date2)
-
-        for price in data["prices"]:
-            list1.append(price[1])
-
-        #while count < len(list1):
-        #    if count == len(list1)-1:
-        #        pass
-        #    else:
-        #        if list1[count-1] > list1[count]:
-        #            pass
-        #    count += 1
-
-        #Think about the dates
-        #Why is the lowest 27?
-        print(self.convertTimestampToDate(date3))
-        lowest = "buy", date3, 1000000000
-        highest = "sell", date3, 0
-        while count < len(list1):
-            if list1[count] < lowest[2]:
-                lowest = "buy", date3, list1[count]
-            date3 = date3 + 3600.0
-            date4 += 3600
-            count += 1
-        print(self.convertTimestampToDate(date3))
-        print(self.convertTimestampToDate(lowest[1]))
-        
-        #IMPORTANT
-        #from_timestamp
-        #to_timestamp
-        data2 = cg.get_coin_market_chart_range_by_id(id='bitcoin', vs_currency='eur', from_timestamp=lowest[1], to_timestamp=date2)
-        
-        for price in data2["prices"]:
-            list2.append(price[1])
-        
-        count = 0
-
-        while count < len(list2):
-            if list2[count] > highest[2]:
-                highest = "sell", date4, list1[count]
-            date4 = date4 + 3600.0
-            count += 1
-
-        answer = (lowest[0], self.convertTimestampToDate(lowest[1]), lowest[2], highest[0], self.convertTimestampToDate(highest[1]), highest[2])
-
-        return answer
-
-    #    this_one = (0, 0, 0)
-    #
-    #    for amount in list3:
-    #        if amount[0] == "buy":
-    #            this_one = amount
-    #        if amount[2] > most[4]:
-    #            most = (this_one[0], this_one[1], amount[0], amount[1], amount[2])
-    #            print(most[0], self.convertTimestampToDate(most[1]), most[2], self.convertTimestampToDate(most[3]), most[4])
-    #    return (most[0], self.convertTimestampToDate(most[1]), most[2], self.convertTimestampToDate(most[3]), most[4])
+        #print(list4)
 
 if __name__ == "__main__":
     app = Application()
@@ -868,9 +590,7 @@ if __name__ == "__main__":
     #print(app.getHighestTradingVolume2(2021, 11, 29, 2021, 11, 30))
     #app.whenToBuyAndSell1(stime, stime2)
     #app.whenToBuyAndSell2(2021, 11, 29, 2021, 11, 30)
-    #print(app.whenToBuyAndSell3("29-11-2021", "30-11-2021"))
-    #print(app.whenToBuyAndSell4(2021, 11, 29, 2021, 11, 30))
-
-    print(app.whenToBuyAndSell6(2021, 11, 25, 2021, 11, 30))
+    #app.whenToBuyAndSell3("01-12-2020", "03-12-2020")
+    app.whenToBuyAndSell4(2021, 11, 29, 2021, 11, 30)
 
     #print(app.convertTimestampToDate(timestamp1))

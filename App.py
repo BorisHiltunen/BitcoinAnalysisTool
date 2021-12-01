@@ -756,9 +756,6 @@ class Application:
         list1 = []
         list2 = []
         count = 0
-        most = (0, 0, 0, 0, 0)
-        sum = 0
-        number = 0
 
         now = datetime.now()
         date1 = self.correctFormForCrypto2(day1, month1, year1)
@@ -774,23 +771,14 @@ class Application:
         for price in data["prices"]:
             list1.append(price[1])
 
-        #while count < len(list1):
-        #    if count == len(list1)-1:
-        #        pass
-        #    else:
-        #        if list1[count-1] > list1[count]:
-        #            pass
-        #    count += 1
-
         #Think about the dates
         #Why is the lowest 27?
         print(self.convertTimestampToDate(date3))
         lowest = "buy", date3, 1000000000
-        highest = "sell", date3, 0
         while count < len(list1):
             if list1[count] < lowest[2]:
                 lowest = "buy", date3, list1[count]
-            date3 = date3 + 3600.0
+            date3 += 3600
             date4 += 3600
             count += 1
         print(self.convertTimestampToDate(date3))
@@ -805,7 +793,7 @@ class Application:
             list2.append(price[1])
         
         count = 0
-
+        highest = "sell", date4, 0
         while count < len(list2):
             if list2[count] > highest[2]:
                 highest = "sell", date4, list1[count]
@@ -815,16 +803,6 @@ class Application:
         answer = (lowest[0], self.convertTimestampToDate(lowest[1]), lowest[2], highest[0], self.convertTimestampToDate(highest[1]), highest[2])
 
         return answer
-
-    #    this_one = (0, 0, 0)
-    #
-    #    for amount in list3:
-    #        if amount[0] == "buy":
-    #            this_one = amount
-    #        if amount[2] > most[4]:
-    #            most = (this_one[0], this_one[1], amount[0], amount[1], amount[2])
-    #            print(most[0], self.convertTimestampToDate(most[1]), most[2], self.convertTimestampToDate(most[3]), most[4])
-    #    return (most[0], self.convertTimestampToDate(most[1]), most[2], self.convertTimestampToDate(most[3]), most[4])
 
 if __name__ == "__main__":
     app = Application()

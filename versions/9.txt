@@ -94,26 +94,6 @@ cg = CoinGeckoAPI()
 
 class Application:
     def __init__(self):
-        self.data = []
-
-    #Think how to implement this
-    def getData1(self, start, finish):
-
-        list1 = []
-        list2 = []
-
-        date1 = self.correctFormForCrypto2(start)
-        date2 = self.correctFormForCrypto2(finish)
-        data = cg.get_coin_market_chart_range_by_id(id='bitcoin', vs_currency='eur', from_timestamp=date1, to_timestamp=date2)
-
-        for price in data["prices"]:
-            self.data.append(price[1])
-        for price in data["total_volumes"]:
-            self.data.append(price[1])
-        
-        return None
-
-    def getData2(self, year1, month1, day1, year2, month2, day2):
         pass
 
     def correctFormForCrypto1(self, day, month, year):

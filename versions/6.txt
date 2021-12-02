@@ -73,7 +73,7 @@
 #Venv is needed for the module to work
 
 #How to get the data:
-from datetime import datetime
+from datetime import datetime, date
 from pycoingecko import CoinGeckoAPI
 cg = CoinGeckoAPI()
 
@@ -96,12 +96,61 @@ class Application:
     def __init__(self):
         pass
 
-    def correctFormForCrypto1(self, day, month, year):
+#Currently not used
+#----------------------------------------------------------------------
+    def getDays(self, start: str, finish: str):
+        year1 = f"{start[6]}{start[7]}{start[8]}{start[9]}"
+        year2 = f"{finish[6]}{finish[7]}{finish[8]}{finish[9]}"
+        month1 = f"{start[3]}{start[4]}"
+        month2 = f"{finish[3]}{finish[4]}"
+        day1 = f"{start[0]}{start[1]}"
+        day2 = f"{finish[0]}{finish[1]}"
+
+        d1 = date(int(year1), int(month1), int(day1))
+        d2 = date(int(year2), int(month2), int(day2))
+        minus = d1 - d2
+        amount = ""
+        if str(minus)[0] == "-":
+            for letter in str(minus):
+                if letter == "d":
+                    break
+                elif letter == "-":
+                    continue
+                else:
+                    amount = amount + letter
+        #+1 since the first day counts too
+        return int(amount) + 1
+#----------------------------------------------------------------------
+    def correctDateForm1(self, date):
+        new_date = str(date)
+        year = f"{new_date[0]}{new_date[1]}{new_date[2]}{new_date[3]}"
+        month = f"{new_date[5]}{new_date[6]}"
+        day = f"{new_date[8]}{new_date[9]}"
+
+        correctForm = f"{day}-{month}-{year}"
+        return correctForm
+#----------------------------------------------------------------------
+    def correctFormForDatetime1(self, date):
+        year = f"{date[6]}{date[7]}{date[8]}{date[9]}"
+        month = f"{date[3]}{date[4]}"
+        day = f"{date[0]}{date[1]}"
+        #is tuple and should be integer?
+        return int(year), int(month), int(day)
+#----------------------------------------------------------------------
+    def correctFormForDatetime2(self, day, month, year):
+        #is tuple and should be integer?
+        return int(year), int(month), int(day)
+#----------------------------------------------------------------------
+    def correctFormForCrypto1(self, year, month, day):
+        return f"{day}-{month}-{year}"
+#----------------------------------------------------------------------
+
+    def correctFormForCrypto2(self, day, month, year):
         stime = f"{day}/{month}/{year}"
         timestamp = datetime.strptime(stime, "%d/%m/%Y").timestamp()
         return timestamp
 
-    def correctFormForCrypto2(self, date):
+    def correctFormForCrypto3(self, date):
         year = f"{date[6]}{date[7]}{date[8]}{date[9]}"
         month = f"{date[3]}{date[4]}"
         day = f"{date[0]}{date[1]}"
@@ -117,16 +166,18 @@ class Application:
     #Downward trend
     def getDownwardTrend1(self, start, finish):
 
+        date1 = self.correctFormForCrypto3(start)
+        date2 = self.correctFormForCrypto3(finish)
+
         list1 = []
         list2 = []
         list3 = []
+        list4 = []
+        list5 = []
         count = 0
         most = 0
 
-        date1 = self.correctFormForCrypto2(start)
-        date2 = self.correctFormForCrypto2(finish)
         data = cg.get_coin_market_chart_range_by_id(id='bitcoin', vs_currency='eur', from_timestamp=date1, to_timestamp=date2)
-        
         for price in data["prices"]:
             list1.append(price[1])
 
@@ -136,6 +187,8 @@ class Application:
                     list2.append(list1[count])
                 else:
                     list3.append(len(list2))
+                    list4.append((count, list2))
+                    list5.append((len(list2), "-1", list2))
                     list2 = []
             else:
                 if list1[count] > list1[count+1]:
@@ -144,6 +197,8 @@ class Application:
                     list2.append(list1[count+1])
                 else:
                     list3.append(len(list2))
+                    list4.append((count, list2))
+                    list5.append((len(list2), "-1", list2))
                     list2 = []
             count += 1
 
@@ -161,8 +216,8 @@ class Application:
         count = 0
         most = 0
 
-        date1 = self.correctFormForCrypto1(day1, month1, year1)
-        date2 = self.correctFormForCrypto1(day2, month2, year2)
+        date1 = self.correctFormForCrypto2(day1, month1, year1)
+        date2 = self.correctFormForCrypto2(day2, month2, year2)
         data = cg.get_coin_market_chart_range_by_id(id='bitcoin', vs_currency='eur', from_timestamp=date1, to_timestamp=date2)
 
         for price in data["prices"]:
@@ -192,8 +247,8 @@ class Application:
 
     def getHighestTradingVolume1(self, start, finish):
 
-        date1 = self.correctFormForCrypto2(start)
-        date2 = self.correctFormForCrypto2(finish)
+        date1 = self.correctFormForCrypto3(start)
+        date2 = self.correctFormForCrypto3(finish)
         data = cg.get_coin_market_chart_range_by_id(id='bitcoin', vs_currency='eur', from_timestamp=date1, to_timestamp=date2)
         highest = 0
 
@@ -204,8 +259,8 @@ class Application:
     
     def getHighestTradingVolume2(self, year1, month1, day1, year2, month2, day2):
 
-        date1 = self.correctFormForCrypto1(day1, month1, year1)
-        date2 = self.correctFormForCrypto1(day2, month2, year2)
+        date1 = self.correctFormForCrypto2(day1, month1, year1)
+        date2 = self.correctFormForCrypto2(day2, month2, year2)
         data = cg.get_coin_market_chart_range_by_id(id='bitcoin', vs_currency='eur', from_timestamp=date1, to_timestamp=date2)
         highest = 0
 
@@ -221,8 +276,8 @@ class Application:
         list2 = []
         count = 0
 
-        date1 = self.correctFormForCrypto2(start)
-        date2 = self.correctFormForCrypto2(finish)
+        date1 = self.correctFormForCrypto3(start)
+        date2 = self.correctFormForCrypto3(finish)
         now = datetime.now()
 
         if date2 != now.strftime("%d-%b-%Y (%H:%M:%S.%f)"):
@@ -267,8 +322,8 @@ class Application:
         list2 = []
         count = 0
 
-        date1 = self.correctFormForCrypto1(day1, month1, year1)
-        date2 = self.correctFormForCrypto1(day2, month2, year2)
+        date1 = self.correctFormForCrypto2(day1, month1, year1)
+        date2 = self.correctFormForCrypto2(day2, month2, year2)
         now = datetime.now()
 
         if date2 != now.strftime("%d-%b-%Y (%H:%M:%S.%f)"):
@@ -309,17 +364,10 @@ class Application:
 if __name__ == "__main__":
     app = Application()
 
-    #Funktions used in the app
-    #----------------------------------------------------
-    #print(app.correctFormForCrypto1(25, 11, 2021))
-
-    #print(app.correctFormForCrypto2("25-11-2021"))
-
-    #print(app.convertTimestampToDate(1257326176))
-    #----------------------------------------------------
+    #print(app.getDays("13-07-2020", "24-07-2020"))
+    #print(app.correctDateForm("2020-01-04"))
 
     #IMPORTANT
-    #----------------------------------------------------
     #if stime = "30/10/2021"
     # and stime2 = "30/11/2021"
     #data shows 747 hours 
@@ -328,16 +376,13 @@ if __name__ == "__main__":
 
     #btw it seems that every week there is one hour more
     #why?
-    #----------------------------------------------------
+    #IMPORTANT
 
-    #A) mission Funktions (DownWardTrend)
-    #print(app.getDownwardTrend1("25-11-2021", "30-11-2021"))
-    #print(app.getDownwardTrend2(2021, 11, 25, 2021, 11, 30))
+    print(app.getDownwardTrend1("25-11-2021", "30-11-2021"))
+    print(app.getDownwardTrend2(2021, 11, 25, 2021, 11, 30))
 
-    #B) mission Funktions (HighestTradingVolume)
-    #print(app.getHighestTradingVolume1("25-11-2021", "30-11-2021"))
-    #print(app.getHighestTradingVolume2(2021, 11, 25, 2021, 11, 30))
+    print(app.getHighestTradingVolume1("25-11-2021", "30-11-2021"))
+    print(app.getHighestTradingVolume2(2021, 11, 25, 2021, 11, 30))
 
-    #C) mission Funktions (TimeMachine)
-    #print(app.whenToBuyAndSell1("25-11-2021", "30-11-2021"))
-    #print(app.whenToBuyAndSell2(2021, 11, 25, 2021, 11, 30))
+    print(app.whenToBuyAndSell1("25-11-2021", "30-11-2021"))
+    print(app.whenToBuyAndSell2(2021, 11, 25, 2021, 11, 30))

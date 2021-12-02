@@ -117,16 +117,18 @@ class Application:
     #Downward trend
     def getDownwardTrend1(self, start, finish):
 
+        date1 = self.correctFormForCrypto2(start)
+        date2 = self.correctFormForCrypto2(finish)
+
         list1 = []
         list2 = []
         list3 = []
+        list4 = []
+        list5 = []
         count = 0
         most = 0
 
-        date1 = self.correctFormForCrypto2(start)
-        date2 = self.correctFormForCrypto2(finish)
         data = cg.get_coin_market_chart_range_by_id(id='bitcoin', vs_currency='eur', from_timestamp=date1, to_timestamp=date2)
-        
         for price in data["prices"]:
             list1.append(price[1])
 
@@ -136,6 +138,8 @@ class Application:
                     list2.append(list1[count])
                 else:
                     list3.append(len(list2))
+                    list4.append((count, list2))
+                    list5.append((len(list2), "-1", list2))
                     list2 = []
             else:
                 if list1[count] > list1[count+1]:
@@ -144,6 +148,8 @@ class Application:
                     list2.append(list1[count+1])
                 else:
                     list3.append(len(list2))
+                    list4.append((count, list2))
+                    list5.append((len(list2), "-1", list2))
                     list2 = []
             count += 1
 
@@ -309,17 +315,20 @@ class Application:
 if __name__ == "__main__":
     app = Application()
 
-    #Funktions used in the app
+    #CHECK THESE WORK CORRECTLY
     #----------------------------------------------------
-    #print(app.correctFormForCrypto1(25, 11, 2021))
+    #print(app.getDays("13-07-2020", "24-07-2020"))
 
-    #print(app.correctFormForCrypto2("25-11-2021"))
+    #print(app.correctDateForm("2020-01-04"))
 
-    #print(app.convertTimestampToDate(1257326176))
+    #print(app.correctFormForCrypto1(day, month, year))
+
+    #print(app.correctFormForCrypto2(date))
+
+    #print(app.convertTimestampToDate(1257326))
     #----------------------------------------------------
 
     #IMPORTANT
-    #----------------------------------------------------
     #if stime = "30/10/2021"
     # and stime2 = "30/11/2021"
     #data shows 747 hours 
@@ -328,16 +337,13 @@ if __name__ == "__main__":
 
     #btw it seems that every week there is one hour more
     #why?
-    #----------------------------------------------------
+    #IMPORTANT
 
-    #A) mission Funktions (DownWardTrend)
     #print(app.getDownwardTrend1("25-11-2021", "30-11-2021"))
     #print(app.getDownwardTrend2(2021, 11, 25, 2021, 11, 30))
 
-    #B) mission Funktions (HighestTradingVolume)
     #print(app.getHighestTradingVolume1("25-11-2021", "30-11-2021"))
     #print(app.getHighestTradingVolume2(2021, 11, 25, 2021, 11, 30))
 
-    #C) mission Funktions (TimeMachine)
     #print(app.whenToBuyAndSell1("25-11-2021", "30-11-2021"))
     #print(app.whenToBuyAndSell2(2021, 11, 25, 2021, 11, 30))

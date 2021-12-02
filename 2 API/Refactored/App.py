@@ -94,7 +94,64 @@ cg = CoinGeckoAPI()
 
 class Application:
     def __init__(self):
+        self.data = []
+
+    #Think how to implement this
+    def getData1(self, start: str, finish: str):
+
+        prices = []
+        total_volumes = []
+        count = 0
+        self.data = []
+
+        date1 = self.correctFormForCrypto2(start)
+        date2 = self.correctFormForCrypto2(finish)
+        now = datetime.now()
+
+        if date2 != now.strftime("%d-%b-%Y (%H:%M:%S.%f)"):
+            date2 += 3600
+
+        data = cg.get_coin_market_chart_range_by_id(id='bitcoin', vs_currency='eur', from_timestamp=date1, to_timestamp=date2)
+
+        for price in data["prices"]:
+            prices.append(price[1])
+        for price in data["total_volumes"]:
+            total_volumes.append(price[1])
+
+        while count < len(prices):
+            self.data.append(tuple((date1, prices[count], total_volumes[count])))
+            date1 += 3600
+            count += 1
+
+    def getData2(self, year1, month1, day1, year2, month2, day2):
         pass
+
+    #Think how to implement this
+    def getData3(self, timestamp1: int, timestamp2: int):
+
+        prices = []
+        total_volumes = []
+        count = 0
+        returnable_data = []
+
+        now = datetime.now()
+
+        if timestamp2 != now.strftime("%d-%b-%Y (%H:%M:%S.%f)"):
+            timestamp2 += 3600
+
+        data = cg.get_coin_market_chart_range_by_id(id='bitcoin', vs_currency='eur', from_timestamp=timestamp1, to_timestamp=timestamp2)
+
+        for price in data["prices"]:
+            prices.append(price[1])
+        for price in data["total_volumes"]:
+            total_volumes.append(price[1])
+
+        while count < len(prices):
+            returnable_data.append(tuple((timestamp1, prices[count], total_volumes[count])))
+            timestamp1 += 3600
+            count += 1
+
+        return returnable_data
 
     def correctFormForCrypto1(self, day, month, year):
         date_in_correct_form = f"{day}/{month}/{year}"
@@ -115,11 +172,11 @@ class Application:
         return date
 
     #Downward trend
-    def getDownwardTrend1(self, start, finish):
+    def getDownwardTrend1(self, start: str, finish: str):
 
-        list1 = []
-        list2 = []
-        list3 = []
+        all_prices = []
+        chosen_prices = []
+        chosen_price_quantities = []
         count = 0
         most = 0
 
@@ -128,26 +185,26 @@ class Application:
         data = cg.get_coin_market_chart_range_by_id(id='bitcoin', vs_currency='eur', from_timestamp=date1, to_timestamp=date2)
 
         for price in data["prices"]:
-            list1.append(price[1])
+            all_prices.append(price[1])
 
-        while count < len(list1):
-            if count == len(list1)-1:
-                if list1[count-1] > list1[count]:
-                    list2.append(list1[count])
+        while count < len(all_prices):
+            if count == len(all_prices)-1:
+                if all_prices[count-1] > all_prices[count]:
+                    chosen_prices.append(all_prices[count])
                 else:
-                    list3.append(len(list2))
-                    list2 = []
+                    chosen_price_quantities.append(len(chosen_prices))
+                    chosen_prices = []
             else:
-                if list1[count] > list1[count+1]:
-                    if list1[count] not in list2:
-                        list2.append(list1[count])
-                    list2.append(list1[count+1])
+                if all_prices[count] > all_prices[count+1]:
+                    if all_prices[count] not in chosen_prices:
+                        chosen_prices.append(all_prices[count])
+                    chosen_prices.append(all_prices[count+1])
                 else:
-                    list3.append(len(list2))
-                    list2 = []
+                    chosen_price_quantities.append(len(chosen_prices))
+                    chosen_prices = []
             count += 1
 
-        for quantity in list3:
+        for quantity in chosen_price_quantities:
             if quantity > most:
                 most = quantity
         return most
@@ -155,9 +212,9 @@ class Application:
     #Downward trend
     def getDownwardTrend2(self, year1, month1, day1, year2, month2, day2):
 
-        list1 = []
-        list2 = []
-        list3 = []
+        all_prices = []
+        chosen_prices = []
+        chosen_price_quantities = []
         count = 0
         most = 0
 
@@ -166,32 +223,32 @@ class Application:
         data = cg.get_coin_market_chart_range_by_id(id='bitcoin', vs_currency='eur', from_timestamp=date1, to_timestamp=date2)
 
         for price in data["prices"]:
-            list1.append(price[1])
+            all_prices.append(price[1])
         
-        while count < len(list1):
-            if count == len(list1)-1:
-                if list1[count-1] > list1[count]:
-                    list2.append(list1[count])
+        while count < len(all_prices):
+            if count == len(all_prices)-1:
+                if all_prices[count-1] > all_prices[count]:
+                    chosen_prices.append(all_prices[count])
                 else:
-                    list3.append(len(list2))
-                    list2 = []
+                    chosen_price_quantities.append(len(chosen_prices))
+                    chosen_prices = []
             else:
-                if list1[count] > list1[count+1]:
-                    if list1[count] not in list2:
-                        list2.append(list1[count])
-                    list2.append(list1[count+1])
+                if all_prices[count] > all_prices[count+1]:
+                    if all_prices[count] not in chosen_prices:
+                        chosen_prices.append(all_prices[count])
+                    chosen_prices.append(all_prices[count+1])
                 else:
-                    list3.append(len(list2))
-                    list2 = []
+                    chosen_price_quantities.append(len(chosen_prices))
+                    chosen_prices = []
             count += 1
 
-        for quantity in list3:
+        for quantity in chosen_price_quantities:
             if quantity > most:
                 most = quantity
         return most
 
     #HighestTradingVolume
-    def getHighestTradingVolume1(self, start, finish):
+    def getHighestTradingVolume1(self, start: str, finish: str):
 
         date1 = self.correctFormForCrypto2(start)
         date2 = self.correctFormForCrypto2(finish)
@@ -202,6 +259,7 @@ class Application:
             if volume[1] > highest:
                 highest = volume[1]
         return highest
+
     #HighestTradingVolume
     def getHighestTradingVolume2(self, year1, month1, day1, year2, month2, day2):
 
@@ -216,11 +274,11 @@ class Application:
         return highest
 
     #TimeMachine
-    #remember to add 1 hour to the to_timestamp
+    #if more than 6 days +1 hour
     def whenToBuyAndSell1(self, start: str, finish:str):
 
-        list1 = []
-        list2 = []
+        all_prices = []
+        chosen_prices = []
         count = 0
 
         date1 = self.correctFormForCrypto2(start)
@@ -233,28 +291,28 @@ class Application:
         data = cg.get_coin_market_chart_range_by_id(id='bitcoin', vs_currency='eur', from_timestamp=date1, to_timestamp=date2)
 
         for price in data["prices"]:
-            list1.append(price[1])
+            all_prices.append(price[1])
 
         lowest = "buy", date1, 1000000000
 
-        while count < len(list1):
-            if list1[count] < lowest[2]:
-                lowest = "buy", date1, list1[count]
+        while count < len(all_prices):
+            if all_prices[count] < lowest[2]:
+                lowest = "buy", date1, all_prices[count]
             date1 += 3600
             count += 1
 
         data2 = cg.get_coin_market_chart_range_by_id(id='bitcoin', vs_currency='eur', from_timestamp=lowest[1], to_timestamp=date2)
         
         for price in data2["prices"]:
-            list2.append(price[1])
+            chosen_prices.append(price[1])
         
         count = 0
         date1 = lowest[1]
         highest = "sell", date1, 0
 
-        while count < len(list2):
-            if list2[count] > highest[2]:
-                highest = "sell", date1, list2[count]
+        while count < len(chosen_prices):
+            if chosen_prices[count] > highest[2]:
+                highest = "sell", date1, chosen_prices[count]
             date1 += 3600
             count += 1
 
@@ -269,8 +327,8 @@ class Application:
     #if more than 6 days +1 hour
     def whenToBuyAndSell2(self, year1, month1, day1, year2, month2, day2):
 
-        list1 = []
-        list2 = []
+        all_prices = []
+        chosen_prices = []
         count = 0
 
         date1 = self.correctFormForCrypto1(day1, month1, year1)
@@ -283,28 +341,68 @@ class Application:
         data = cg.get_coin_market_chart_range_by_id(id='bitcoin', vs_currency='eur', from_timestamp=date1, to_timestamp=date2)
 
         for price in data["prices"]:
-            list1.append(price[1])
+            all_prices.append(price[1])
 
         lowest = "buy", date1, 1000000000
 
-        while count < len(list1):
-            if list1[count] < lowest[2]:
-                lowest = "buy", date1, list1[count]
+        while count < len(all_prices):
+            if all_prices[count] < lowest[2]:
+                lowest = "buy", date1, all_prices[count]
             date1 += 3600
             count += 1
 
         data2 = cg.get_coin_market_chart_range_by_id(id='bitcoin', vs_currency='eur', from_timestamp=lowest[1], to_timestamp=date2)
         
         for price in data2["prices"]:
-            list2.append(price[1])
+            chosen_prices.append(price[1])
         
         count = 0
         date1 = lowest[1]
         highest = "sell", date1, 0
 
-        while count < len(list2):
-            if list2[count] > highest[2]:
-                highest = "sell", date1, list2[count]
+        while count < len(chosen_prices):
+            if chosen_prices[count] > highest[2]:
+                highest = "sell", date1, chosen_prices[count]
+            date1 += 3600
+            count += 1
+
+        if highest[2] < lowest[2]:
+            return "Don't buy"
+        else:
+            answer = (lowest[0], self.convertTimestampToDate(lowest[1]), lowest[2], highest[0], self.convertTimestampToDate(highest[1]), highest[2])
+
+            return answer
+
+    #TimeMachine
+    #remember to add 1 hour to the to_timestamp
+    #Think how to make this more simple
+    def whenToBuyAndSell3(self, start: str, finish:str):
+
+        chosen_prices = []
+        count = 0
+
+        date1 = self.correctFormForCrypto2(start)
+        date2 = self.correctFormForCrypto2(finish)
+
+        lowest = "buy", date1, 1000000000
+
+        while count < len(self.data):
+            if self.data[count][1] < lowest[2]:
+                lowest = "buy", self.data[count][0], self.data[count][1]
+            count += 1
+
+        data2 = cg.get_coin_market_chart_range_by_id(id='bitcoin', vs_currency='eur', from_timestamp=lowest[1], to_timestamp=date2)
+        
+        for price in data2["prices"]:
+            chosen_prices.append(price[1])
+        
+        count = 0
+        date1 = lowest[1]
+        highest = "sell", date1, 0
+
+        while count < len(chosen_prices):
+            if chosen_prices[count] > highest[2]:
+                highest = "sell", date1, chosen_prices[count]
             date1 += 3600
             count += 1
 
@@ -320,6 +418,12 @@ if __name__ == "__main__":
 
     #Funktions used in the app
     #----------------------------------------------------
+    app.getData1("25-11-2021", "30-11-2021")
+
+    #app.getData2(2012, 1, 1, 2012, 2, 1)
+
+    #print(app.getData3(1257326176, 1257326176))
+
     #print(app.correctFormForCrypto1(25, 11, 2021))
 
     #print(app.correctFormForCrypto2("25-11-2021"))
@@ -352,7 +456,9 @@ if __name__ == "__main__":
     #Buy ans sell test
     #print(app.whenToBuyAndSell1("25-11-2021", "30-11-2021"))
     #print(app.whenToBuyAndSell2(2021, 11, 25, 2021, 11, 30))
+    print(app.whenToBuyAndSell3("25-11-2021", "30-11-2021"))
 
     #Don't buy test
-    print(app.whenToBuyAndSell1("12-06-2021", "20-05-2021"))
-    print(app.whenToBuyAndSell2(2021, 6, 12, 2021, 5, 20))
+    #print(app.whenToBuyAndSell1("12-06-2021", "20-05-2021"))
+    #print(app.whenToBuyAndSell2(2021, 6, 12, 2021, 5, 20))
+    print(app.whenToBuyAndSell3("12-06-2021", "20-05-2021"))

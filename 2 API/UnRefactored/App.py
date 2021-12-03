@@ -171,6 +171,9 @@ class Application:
         date = datetime.fromtimestamp(timestamp)
         return date
 
+    def rekursion(self, start, finish):
+        pass
+
     #Downward trend
     def getDownwardTrend1(self, start: str, finish: str):
 

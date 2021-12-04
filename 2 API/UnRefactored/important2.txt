@@ -73,6 +73,7 @@
 #Venv is needed for the module to work
 
 #How to get the data:
+from flask import Flask
 from datetime import datetime
 from pycoingecko import CoinGeckoAPI
 cg = CoinGeckoAPI()
@@ -87,6 +88,34 @@ cg = CoinGeckoAPI()
 #1 - 90 days from query time = hourly data
 #above 90 days from query time = daily data (00:00 UTC)
 
+#1 hour = 3600
+#day = 86400
+#week = 604800
+#month = 2629743
+
+#IMPORTANT
+#CHECK
+#--------------------------------------------------------------------------------
+app2 = Flask(__name__)
+
+@app2.route('/')
+def main():
+    return "working"
+@app2.route('/get/DownTrend/')
+def getDownTrend():
+    return Application.getDownwardTrend1("25-11-2021", "30-11-2021")
+
+@app2.route('/get/HighestTradingVolume/')
+def getHighestTradingVolume():
+    return Application.getDownwardTrend1("25-11-2021", "30-11-2021")
+
+@app2.route('/get/BuyAndSellDates/')
+def getBuyAndSellDates():
+   # return Application.getHighestTradingVolume1("25-11-2021", "30-11-2021")
+   return "why"
+
+#--------------------------------------------------------------------------------
+
 class Application:
     def __init__(self):
         self.data = []
@@ -99,8 +128,8 @@ class Application:
         count = 0
         self.data = []
 
-        date1 = self.correctFormForCrypto(start)
-        date2 = self.correctFormForCrypto(finish)
+        date1 = self.correctFormForCrypto2(start)
+        date2 = self.correctFormForCrypto2(finish)
         now = datetime.now()
 
         if date2 != now.strftime("%d-%b-%Y (%H:%M:%S.%f)"):
@@ -118,8 +147,11 @@ class Application:
             date1 += 3600
             count += 1
 
+    def getData2(self, year1, month1, day1, year2, month2, day2):
+        pass
+
     #Think how to implement this
-    def getData2(self, timestamp1: int, timestamp2: int):
+    def getData3(self, timestamp1: int, timestamp2: int):
 
         prices = []
         total_volumes = []
@@ -145,7 +177,12 @@ class Application:
 
         return returnable_data
 
-    def correctFormForCrypto(self, date):
+    def correctFormForCrypto1(self, day, month, year):
+        date_in_correct_form = f"{day}/{month}/{year}"
+        timestamp = datetime.strptime(date_in_correct_form, "%d/%m/%Y").timestamp()
+        return timestamp
+
+    def correctFormForCrypto2(self, date):
         year = f"{date[6]}{date[7]}{date[8]}{date[9]}"
         month = f"{date[3]}{date[4]}"
         day = f"{date[0]}{date[1]}"
@@ -154,6 +191,7 @@ class Application:
         timestamp = datetime.strptime(date_in_correct_form, "%d/%m/%Y").timestamp()
         return timestamp
 
+    #"25-11-2021|30-11-2021"
     def getDates(self, date: str):
         year1 = f"{date[6]}{date[7]}{date[8]}{date[9]}"
         month1 = f"{date[3]}{date[4]}"
@@ -173,8 +211,11 @@ class Application:
         date = datetime.fromtimestamp(timestamp)
         return date
 
+    def rekursion(self, start, finish):
+        pass
+
     #Downward trend
-    def getDownwardTrend(self, dates: str):
+    def getDownwardTrend1(self, dates: str):
 
         all_prices = []
         chosen_prices = []
@@ -184,15 +225,6 @@ class Application:
 
         date1 = self.getDates(dates)[0]
         date2 = self.getDates(dates)[1]
-
-        if date1 > date2:
-            return "bad end date"
-
-        now = datetime.now()
-
-        if date2 != now.strftime("%d-%b-%Y (%H:%M:%S.%f)"):
-            date2 += 3600
-
         data = cg.get_coin_market_chart_range_by_id(id='bitcoin', vs_currency='eur', from_timestamp=date1, to_timestamp=date2)
 
         for price in data["prices"]:
@@ -218,33 +250,24 @@ class Application:
         for quantity in chosen_price_quantities:
             if quantity > most:
                 most = quantity
-        #return most
-        return f"In bitcoin’s historical data from CoinGecko, the price decreased {most} days in a row for the inputs from {self.convertTimestampToDate(date1)} and to {self.convertTimestampToDate(date2)}"
+        return most
 
     #HighestTradingVolume
-    def getHighestTradingVolume(self, dates: str):
+    def getHighestTradingVolume1(self, dates: str):
 
         date1 = self.getDates(dates)[0]
         date2 = self.getDates(dates)[1]
-
-        now = datetime.now()
-
-        if date2 != now.strftime("%d-%b-%Y (%H:%M:%S.%f)"):
-            date2 += 3600
-
         data = cg.get_coin_market_chart_range_by_id(id='bitcoin', vs_currency='eur', from_timestamp=date1, to_timestamp=date2)
-        highest = date1, 0
+        highest = 0
 
         for volume in data["total_volumes"]:
-            if volume[1] > highest[0]:
-                highest = date1, volume[1]
-            date1 += 3600
-        #return highest[1]
-        return f"{highest[0]}:{highest[1]}"
+            if volume[1] > highest:
+                highest = volume[1]
+        return highest
 
     #TimeMachine
     #if more than 6 days +1 hour
-    def whenToBuyAndSell(self, dates: str):
+    def whenToBuyAndSell1(self, dates: str):
 
         all_prices = []
         chosen_prices = []
@@ -252,10 +275,6 @@ class Application:
 
         date1 = self.getDates(dates)[0]
         date2 = self.getDates(dates)[1]
-
-        if date1 > date2:
-            return "bad end date"
-
         now = datetime.now()
 
         if date2 != now.strftime("%d-%b-%Y (%H:%M:%S.%f)"):
@@ -292,9 +311,9 @@ class Application:
         if highest[2] < lowest[2]:
             return "Don't buy"
         else:
-            return f"{self.convertTimestampToDate(lowest[1])}, {self.convertTimestampToDate(highest[1])}"
-            #answer = (lowest[0], self.convertTimestampToDate(lowest[1]), int(lowest[2]), highest[0], self.convertTimestampToDate(highest[1]), int(highest[2]))
-            #return answer
+            answer = (lowest[0], self.convertTimestampToDate(lowest[1]), lowest[2], highest[0], self.convertTimestampToDate(highest[1]), highest[2])
+
+            return answer
 
     #TimeMachine
     #remember to add 1 hour to the to_timestamp
@@ -304,11 +323,8 @@ class Application:
         chosen_prices = []
         count = 0
 
-        date1 = self.getDates(dates)[0]
-        date2 = self.getDates(dates)[1]
-
-        if date1 > date2:
-            return "bad end date"
+        date1 = self.correctFormForCrypto2(start)
+        date2 = self.correctFormForCrypto2(finish)
 
         lowest = "buy", date1, 1000000000
 
@@ -335,23 +351,27 @@ class Application:
         if highest[2] < lowest[2]:
             return "Don't buy"
         else:
-            return f"{self.convertTimestampToDate(lowest[1])}, {self.convertTimestampToDate(highest[1])}"
-            #answer = (lowest[0], self.convertTimestampToDate(lowest[1]), int(lowest[2]), highest[0], self.convertTimestampToDate(highest[1]), int(highest[2]))
-            #return answer
+            answer = (lowest[0], self.convertTimestampToDate(lowest[1]), int(lowest[2]), highest[0], self.convertTimestampToDate(highest[1]), int(highest[2]))
+
+            return answer
 
 if __name__ == "__main__":
     app = Application()
+    app2.run()
 
     #Funktions used in the app
     #----------------------------------------------------
-    print(1)
     app.getData1("25-11-2021", "30-11-2021")
-    """print(2)
-    print(app.getData2(1637791200.0, 1638223200.0))
-    print(3)
-    print(app.correctFormForCrypto("25-11-2021"))
-    print(4)
-    print(app.convertTimestampToDate(1257326176)) """
+
+    #app.getData2(2012, 1, 1, 2012, 2, 1)
+
+    #print(app.getData3(1257326176, 1257326176))
+
+    #print(app.correctFormForCrypto1(25, 11, 2021))
+
+    #print(app.correctFormForCrypto2("25-11-2021"))
+
+    #print(app.convertTimestampToDate(1257326176))
     #----------------------------------------------------
 
     #IMPORTANT
@@ -367,17 +387,21 @@ if __name__ == "__main__":
     #----------------------------------------------------
 
     #A) mission Funktions (DownWardTrend)
-    print(app.getDownwardTrend("25-11-2021|30-11-2021"))
+    #print(app.getDownwardTrend1("25-11-2021", "30-11-2021"))
+    #print(app.getDownwardTrend2(2021, 11, 25, 2021, 11, 30))
 
     #B) mission Funktions (HighestTradingVolume)
-    print(app.getHighestTradingVolume("25-11-2021|30-11-2021"))
+    #print(app.getHighestTradingVolume1("25-11-2021", "30-11-2021"))
+    #print(app.getHighestTradingVolume2(2021, 11, 25, 2021, 11, 30))
 
     #C) mission Funktions (TimeMachine)
 
     #Buy ans sell test
-    print(app.whenToBuyAndSell("25-11-2021|30-11-2021"))
+    #print(app.whenToBuyAndSell1("25-11-2021", "30-11-2021"))
+    #print(app.whenToBuyAndSell2(2021, 11, 25, 2021, 11, 30))
     print(app.whenToBuyAndSell3("25-11-2021|30-11-2021"))
 
     #Don't buy test
-    print(app.whenToBuyAndSell("12-06-2021|20-05-2021"))
+    #print(app.whenToBuyAndSell1("12-06-2021", "20-05-2021"))
+    #print(app.whenToBuyAndSell2(2021, 6, 12, 2021, 5, 20))
     print(app.whenToBuyAndSell3("12-06-2021|20-05-2021"))

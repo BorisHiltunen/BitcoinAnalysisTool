@@ -73,7 +73,7 @@
 #Venv is needed for the module to work
 
 #How to get the data:
-from datetime import datetime
+from datetime import datetime, timezone
 from pycoingecko import CoinGeckoAPI
 cg = CoinGeckoAPI()
 
@@ -92,6 +92,7 @@ class Application:
         self.data = []
 
     #Think how to implement this
+    #Funktion for getting data with start and finish dates
     def getData1(self, start: str, finish: str):
 
         prices = []
@@ -119,6 +120,7 @@ class Application:
             count += 1
 
     #Think how to implement this
+    #Funktion for getting data with two timestamps
     def getData2(self, timestamp1: int, timestamp2: int):
 
         prices = []
@@ -145,15 +147,22 @@ class Application:
 
         return returnable_data
 
-    def correctFormForCrypto(self, date):
+    #Funktion that changes date into timestamp
+    def correctFormForCrypto(self, date: str):
         year = f"{date[6]}{date[7]}{date[8]}{date[9]}"
         month = f"{date[3]}{date[4]}"
         day = f"{date[0]}{date[1]}"
 
-        date_in_correct_form = f"{day}/{month}/{year}"
-        timestamp = datetime.strptime(date_in_correct_form, "%d/%m/%Y").timestamp()
-        return timestamp
+        date_in_correct_form = f"{year}-{month}-{day} 00:00:00"
 
+        string_to_date = datetime.fromisoformat(date_in_correct_form)
+
+        utc_time = string_to_date.replace(tzinfo=timezone.utc)
+        utc_timestamp = utc_time.timestamp()
+
+        return utc_timestamp
+
+    #Funktion that changes string containing two dates into tuple that contains two timestamps
     def getDates(self, date: str):
         year1 = f"{date[6]}{date[7]}{date[8]}{date[9]}"
         month1 = f"{date[3]}{date[4]}"
@@ -163,17 +172,27 @@ class Application:
         month2 = f"{date[14]}{date[15]}"
         day2 = f"{date[11]}{date[12]}"
 
-        date_in_correct_form1 = f"{day1}/{month1}/{year1}"
-        date_in_correct_form2 = f"{day2}/{month2}/{year2}"
-        timestamp1 = datetime.strptime(date_in_correct_form1, "%d/%m/%Y").timestamp()
-        timestamp2 = datetime.strptime(date_in_correct_form2, "%d/%m/%Y").timestamp()
-        return timestamp1, timestamp2
+        date_in_correct_form1 = f"{year1}-{month1}-{day1} 00:00:00"
+        date_in_correct_form2 = f"{year2}-{month2}-{day2} 00:00:00"
 
+        string_to_date1 = datetime.fromisoformat(date_in_correct_form1)
+        string_to_date2 = datetime.fromisoformat(date_in_correct_form2)
+
+        utc_time1 = string_to_date1.replace(tzinfo=timezone.utc)
+        utc_time2 = string_to_date2.replace(tzinfo=timezone.utc)
+
+        utc_timestamp1 = utc_time1.timestamp()
+        utc_timestamp2 = utc_time2.timestamp()
+
+        return utc_timestamp1, utc_timestamp2
+
+    #Funktion that converts timestamp into a date
     def convertTimestampToDate(self, timestamp):
         date = datetime.fromtimestamp(timestamp)
         return date
 
     #Downward trend
+    #Funktion that returns biggest downward trend from the given dates
     def getDownwardTrend(self, dates: str):
 
         all_prices = []
@@ -219,13 +238,18 @@ class Application:
             if quantity > most:
                 most = quantity
         #return most
-        return f"In bitcoin’s historical data from CoinGecko, the price decreased {most} days in a row for the inputs from {self.convertTimestampToDate(date1)} and to {self.convertTimestampToDate(date2)}"
+        return (f"In bitcoin’s historical data from CoinGecko, the price decreased {most} days in a row" 
+        f"for the inputs from {self.convertTimestampToDate(date1)} and to {self.convertTimestampToDate(date2)}")
 
     #HighestTradingVolume
+    #Funktion that returns HighestTradingVolume from the given dates
     def getHighestTradingVolume(self, dates: str):
 
         date1 = self.getDates(dates)[0]
         date2 = self.getDates(dates)[1]
+
+        if date1 > date2:
+            return "bad end date"
 
         now = datetime.now()
 
@@ -240,10 +264,11 @@ class Application:
                 highest = date1, volume[1]
             date1 += 3600
         #return highest[1]
-        return f"{highest[0]}:{highest[1]}"
+        return f"{self.convertTimestampToDate(highest[0])}:{highest[1]}"
 
     #TimeMachine
     #if more than 6 days +1 hour
+    #Funktion that returns the best dates to buy and sell bitcoin from the given dates
     def whenToBuyAndSell(self, dates: str):
 
         all_prices = []
@@ -299,6 +324,7 @@ class Application:
     #TimeMachine
     #remember to add 1 hour to the to_timestamp
     #Think how to make this more simple
+    #Funktion that returns the best dates to buy and sell bitcoin from the given dates
     def whenToBuyAndSell3(self, dates: str):
 
         chosen_prices = []
@@ -346,12 +372,12 @@ if __name__ == "__main__":
     #----------------------------------------------------
     print(1)
     app.getData1("25-11-2021", "30-11-2021")
-    """print(2)
+    print(2)
     print(app.getData2(1637791200.0, 1638223200.0))
     print(3)
     print(app.correctFormForCrypto("25-11-2021"))
     print(4)
-    print(app.convertTimestampToDate(1257326176)) """
+    print(app.convertTimestampToDate(1257326176)) 
     #----------------------------------------------------
 
     #IMPORTANT
@@ -367,17 +393,21 @@ if __name__ == "__main__":
     #----------------------------------------------------
 
     #A) mission Funktions (DownWardTrend)
+    print("Downward")
     print(app.getDownwardTrend("25-11-2021|30-11-2021"))
 
     #B) mission Funktions (HighestTradingVolume)
+    print("HighestTradingVolume")
     print(app.getHighestTradingVolume("25-11-2021|30-11-2021"))
 
     #C) mission Funktions (TimeMachine)
 
     #Buy ans sell test
+    print("whenToBuyAndSell")
     print(app.whenToBuyAndSell("25-11-2021|30-11-2021"))
     print(app.whenToBuyAndSell3("25-11-2021|30-11-2021"))
 
     #Don't buy test
+    print("don't buy")
     print(app.whenToBuyAndSell("12-06-2021|20-05-2021"))
     print(app.whenToBuyAndSell3("12-06-2021|20-05-2021"))

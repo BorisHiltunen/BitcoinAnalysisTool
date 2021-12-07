@@ -75,6 +75,8 @@
 #How to get the data:
 from datetime import datetime, timezone
 from pycoingecko import CoinGeckoAPI
+import string
+import json
 cg = CoinGeckoAPI()
 
 #missions
@@ -146,6 +148,53 @@ class Application:
             count += 1
 
         return returnable_data
+
+    #def json_options(self, index):
+    #    return index : {
+    #        "text": "text"
+    #    }
+
+    def DownwardTrendToJsonForm(self, data):
+        dictionary = {}
+        List = ["text", "days", "first_input_date", "second_input_date", "data"]
+
+        for i in List:
+            if i == "text":
+                dictionary[i] = data
+            if i == "days":
+                for letter in data:
+                    if letter in string.digits:
+                        #problem takes every option
+                        dictionary[i] = f"{letter} days"
+            if i == "first_input_date":
+                pass
+            if i == "second_input_date":
+                pass
+            if i == "data":
+                pass
+
+        #Check this when python 3.10 installed
+        """match number:
+            case 0:
+                print("Nothing")
+            case 1:
+                print("Just one")
+            case 2:
+                print("A couple")
+            case -1:
+                print("One less than nothing")
+            case 1-1j:
+                print("Good luck with that...")"""
+
+        return json.dump(dictionary, sort_keys=True, indent=4)
+
+    def HighestTradingVolumeToJsonForm(self, data):
+        dictionary = {}
+        data
+    
+    def BuyAndSellDatesJsonForm(self, data):
+        dictionary = {}
+        data
 
     #Funktion that changes date into timestamp
     def correctFormForCrypto(self, date: str):
@@ -238,8 +287,8 @@ class Application:
             if quantity > most:
                 most = quantity
         #return most
-        return (f"In bitcoin’s historical data from CoinGecko, the price decreased {most} days in a row" 
-        f"for the inputs from {self.convertTimestampToDate(date1)} and to {self.convertTimestampToDate(date2)}")
+        return self.DownwardTrendToJsonForm((f"In bitcoin’s historical data from CoinGecko, the price decreased {most} days in a row" 
+        f" for the inputs from {self.convertTimestampToDate(date1)} and to {self.convertTimestampToDate(date2)}"))
 
     #HighestTradingVolume
     #Funktion that returns HighestTradingVolume from the given dates
@@ -368,7 +417,9 @@ class Application:
 if __name__ == "__main__":
     app = Application()
 
-    #Funktions used in the app
+    print(app.DownwardTrendToJsonForm(app.getDownwardTrend("25-11-2021|30-11-2021")))
+
+    """#Funktions used in the app
     #----------------------------------------------------
     print(1)
     app.getData1("25-11-2021", "30-11-2021")
@@ -378,7 +429,7 @@ if __name__ == "__main__":
     print(app.correctFormForCrypto("25-11-2021"))
     print(4)
     print(app.convertTimestampToDate(1257326176)) 
-    #----------------------------------------------------
+    #----------------------------------------------------"""
 
     #IMPORTANT
     #----------------------------------------------------
@@ -392,22 +443,22 @@ if __name__ == "__main__":
     #why?
     #----------------------------------------------------
 
-    #A) mission Funktions (DownWardTrend)
+    """#A) mission Funktions (DownWardTrend)
     print("Downward")
     print(app.getDownwardTrend("25-11-2021|30-11-2021"))
 
     #B) mission Funktions (HighestTradingVolume)
     print("HighestTradingVolume")
-    print(app.getHighestTradingVolume("25-11-2021|30-11-2021"))
+    print(app.getHighestTradingVolume("25-11-2021|30-11-2021"))"""
 
-    #C) mission Funktions (TimeMachine)
+    """C) mission Funktions (TimeMachine)
 
-    #Buy ans sell test
+    Buy ans sell test
     print("whenToBuyAndSell")
     print(app.whenToBuyAndSell("25-11-2021|30-11-2021"))
     print(app.whenToBuyAndSell3("25-11-2021|30-11-2021"))
 
-    #Don't buy test
+    Don't buy test
     print("don't buy")
     print(app.whenToBuyAndSell("12-06-2021|20-05-2021"))
-    print(app.whenToBuyAndSell3("12-06-2021|20-05-2021"))
+    print(app.whenToBuyAndSell3("12-06-2021|20-05-2021"))"""

@@ -26,7 +26,7 @@ def getHighestTradingVolume():
 
 @app2.route('/get/BuyAndSellDates/')
 def getBuyAndSellDates():
-    return str(app.whenToBuyAndSell("25-11-2021|30-11-2021"))
+    return str(app.getBuyAndSellDates("25-11-2021|30-11-2021"))
 
 #Get data by writing dates in the url
 @app2.route('/get/DownTrend/<dates>/')
@@ -39,7 +39,7 @@ def getHighestTradingVolumeWithUrl(dates):
 
 @app2.route('/get/BuyAndSellDates/<string:dates>/')
 def getBuyAndSellDatesWithUrl(dates):
-    return str(app.whenToBuyAndSell(dates))
+    return str(app.getBuyAndSellDates(dates))
 
 if __name__ == "__main__":
     app2.run()

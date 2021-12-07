@@ -158,43 +158,95 @@ class Application:
         dictionary = {}
         List = ["text", "days", "first_input_date", "second_input_date", "data"]
 
-        for i in List:
-            if i == "text":
-                dictionary[i] = data
-            if i == "days":
-                for letter in data:
-                    if letter in string.digits:
-                        #problem takes every option
-                        dictionary[i] = f"{letter} days"
-            if i == "first_input_date":
-                pass
-            if i == "second_input_date":
-                pass
-            if i == "data":
-                pass
+        for option in List:
+            if option == "text":
+                dictionary[option] = data
+            if option == "days":
+                dictionary[option] = f"{data[1]} days"
+            if option == "first_input_date":
+                dictionary[option] = data[2]
+            if option == "second_input_date":
+                dictionary[option] = data[3]
+            if option == "data":
+                dictionary[option] = data
 
-        #Check this when python 3.10 installed
-        """match number:
-            case 0:
-                print("Nothing")
-            case 1:
-                print("Just one")
-            case 2:
-                print("A couple")
-            case -1:
-                print("One less than nothing")
-            case 1-1j:
-                print("Good luck with that...")"""
+            """match option:
+                case "text":
+                    print("Nothing")
+                case "days":
+                    print("Just one")
+                case "first_input_date":
+                    print("A couple")
+                case "second_input_date":
+                    print("One less than nothing")
+                case "data":
+                    print("Good luck with that...")"""
+        #print(dictionary)
 
-        return json.dump(dictionary, sort_keys=True, indent=4)
+        return json.dumps(dictionary, sort_keys=False, indent=4, default=str)
 
     def HighestTradingVolumeToJsonForm(self, data):
         dictionary = {}
-        data
+        List = ["text", "HighestTradingVolume", "first_input_date", "second_input_date", "data"]
+
+        for option in List:
+            if option == "text":
+                dictionary[option] = data
+            if option == "HighestTradingVolume":
+                pass
+            if option == "first_input_date":
+                dictionary[option] = option
+            if option == "second_input_date":
+                dictionary[option] = option
+            if option == "data":
+                dictionary[option] = data
+
+            """match option:
+                case "text":
+                    print("Nothing")
+                case "days":
+                    print("Just one")
+                case "first_input_date":
+                    print("A couple")
+                case "second_input_date":
+                    print("One less than nothing")
+                case "data":
+                    print("Good luck with that...")"""
+
+        return json.dumps(dictionary, sort_keys=False, indent=4, default=str)
     
     def BuyAndSellDatesJsonForm(self, data):
         dictionary = {}
-        data
+        List = ["text", "BuyAndSellDates", "first_input_date", "second_input_date", "data"]
+
+        for option in List:
+            if option == "text":
+                dictionary[option] = data
+            if option == "days":
+                for letter in data:
+                    if letter in string.digits:
+                        if f"{letter} days" not in dictionary:
+                            dictionary[option] = f"{letter} days"
+            if option == "first_input_date":
+                dictionary[option] = option
+            if option == "second_input_date":
+                dictionary[option] = option
+            if option == "data":
+                dictionary[option] = data
+
+            """match option:
+                case "text":
+                    print("Nothing")
+                case "days":
+                    print("Just one")
+                case "first_input_date":
+                    print("A couple")
+                case "second_input_date":
+                    print("One less than nothing")
+                case "data":
+                    print("Good luck with that...")"""
+
+        return json.dumps(dictionary, sort_keys=False, indent=4, default=str)
 
     #Funktion that changes date into timestamp
     def correctFormForCrypto(self, date: str):
@@ -287,8 +339,11 @@ class Application:
             if quantity > most:
                 most = quantity
         #return most
-        return self.DownwardTrendToJsonForm((f"In bitcoin’s historical data from CoinGecko, the price decreased {most} days in a row" 
-        f" for the inputs from {self.convertTimestampToDate(date1)} and to {self.convertTimestampToDate(date2)}"))
+        answer = (f"In bitcoin’s historical data from CoinGecko, the price decreased {most} days in a row" 
+        f" for the inputs from {self.convertTimestampToDate(date1)} and to {self.convertTimestampToDate(date2)}".replace("\u2019", "'"))
+        #return self.DownwardTrendToJsonForm((f"In bitcoin’s historical data from CoinGecko, the price decreased {most} days in a row" 
+        #f" for the inputs from {self.convertTimestampToDate(date1)} and to {self.convertTimestampToDate(date2)}".replace("\u2019", "'")))
+        return self.DownwardTrendToJsonForm(tuple((answer, most, self.convertTimestampToDate(date1), self.convertTimestampToDate(date2))))
 
     #HighestTradingVolume
     #Funktion that returns HighestTradingVolume from the given dates
@@ -312,13 +367,13 @@ class Application:
             if volume[1] > highest[0]:
                 highest = date1, volume[1]
             date1 += 3600
-        #return highest[1]
-        return f"{self.convertTimestampToDate(highest[0])}:{highest[1]}"
+        #return f"{self.convertTimestampToDate(highest[0])}:{highest[1]}"
+        return self.convertTimestampToDate(highest[0]), highest[1]
 
     #TimeMachine
     #if more than 6 days +1 hour
     #Funktion that returns the best dates to buy and sell bitcoin from the given dates
-    def whenToBuyAndSell(self, dates: str):
+    def getBuyAndSellDates(self, dates: str):
 
         all_prices = []
         chosen_prices = []
@@ -374,7 +429,7 @@ class Application:
     #remember to add 1 hour to the to_timestamp
     #Think how to make this more simple
     #Funktion that returns the best dates to buy and sell bitcoin from the given dates
-    def whenToBuyAndSell3(self, dates: str):
+    def getBuyAndSellDates2(self, dates: str):
 
         chosen_prices = []
         count = 0
@@ -417,7 +472,10 @@ class Application:
 if __name__ == "__main__":
     app = Application()
 
-    print(app.DownwardTrendToJsonForm(app.getDownwardTrend("25-11-2021|30-11-2021")))
+    #print(app.DownwardTrendToJsonForm(app.getDownwardTrend("25-11-2021|30-11-2021")))
+    print(app.getDownwardTrend("25-11-2021|30-11-2021"))
+    #print(app.getHighestTradingVolume("25-11-2021|30-11-2021"))
+    #print(app.getBuyAndSellDates("25-11-2021|30-11-2021"))
 
     """#Funktions used in the app
     #----------------------------------------------------
@@ -449,16 +507,16 @@ if __name__ == "__main__":
 
     #B) mission Funktions (HighestTradingVolume)
     print("HighestTradingVolume")
-    print(app.getHighestTradingVolume("25-11-2021|30-11-2021"))"""
+    print(app.getHighestTradingVolume("25-11-2021|30-11-2021"))
 
-    """C) mission Funktions (TimeMachine)
+    #C) mission Funktions (TimeMachine)
 
-    Buy ans sell test
+    #Buy and sell test
     print("whenToBuyAndSell")
-    print(app.whenToBuyAndSell("25-11-2021|30-11-2021"))
-    print(app.whenToBuyAndSell3("25-11-2021|30-11-2021"))
+    print(app.getBuyAndSellDates("25-11-2021|30-11-2021"))
+    print(app.getBuyAndSellDates2("25-11-2021|30-11-2021"))
 
-    Don't buy test
+    #Don't buy test
     print("don't buy")
-    print(app.whenToBuyAndSell("12-06-2021|20-05-2021"))
-    print(app.whenToBuyAndSell3("12-06-2021|20-05-2021"))"""
+    print(app.getBuyAndSellDates("12-06-2021|20-05-2021"))
+    print(app.getBuyAndSellDates2("12-06-2021|20-05-2021"))"""

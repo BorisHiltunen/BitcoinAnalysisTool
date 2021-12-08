@@ -246,7 +246,7 @@ class Application:
     def highest_trading_volume_to_json_form(self, data):
         dictionary = {}
         dictionary2 = {}
-        options = ["text", "input", "first_date", "second_date", "HighestTradingVolume_date", "HighestTradingVolume", "data"]
+        options = ["text", "input", "first_date", "second_date", "highest_trading_volume_date", "highest_trading_volume", "data"]
         
         for option in options:
             match option:
@@ -261,9 +261,9 @@ class Application:
                                 dictionary2[copy] = data[2]
                             case "second_date":
                                 dictionary2[copy] = data[3]
-                            case "HighestTradingVolume_date":
+                            case "highest_trading_volume_date":
                                 dictionary2[copy] = data[4]
-                            case "HighestTradingVolume":
+                            case "highest_trading_volume":
                                 dictionary2[copy] = data[5]
                     dictionary[option] = dictionary2
 

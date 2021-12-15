@@ -1,7 +1,9 @@
 from flask import Flask, jsonify
 from main import Application
+import json
 
 app = Flask(__name__)
+app.config['JSON_SORT_KEYS'] = False
 application = Application()
 
 #home page
@@ -19,31 +21,31 @@ def get_options():
 
 #Get data by writing dates in the url
 
-# Not in the right form
+# Jsonify (main.py needs to return dictionary)
 @app.route('/get/downward_trend/<dates>/')
 def get_downward_trend_with_url(dates):
-    return (application.get_downward_trend(dates)), 200
+    return jsonify(application.get_downward_trend(dates)), 200
 
 @app.route('/get/highest_trading_volume/<dates>/')
 def get_highest_trading_volume_with_url(dates):
-    return application.get_highest_trading_volume(dates), 200
+    return jsonify(application.get_highest_trading_volume(dates)), 200
 
 @app.route('/get/buy_and_sell_dates/<string:dates>/')
 def get_buy_and_sell_dates_with_url(dates):
-    return application.get_buy_and_sell_dates(dates), 200
+    return jsonify(application.get_buy_and_sell_dates(dates)), 200
 
-# Testing
+# Json.dumps
 """@app.route('/get/downward_trend/<dates>/')
 def get_downward_trend_with_url(dates):
-    return jsonify(str(application.get_downward_trend(dates))), 200
+    return json.dumps(application.get_downward_trend(dates), sort_keys=False, indent=4), 200
 
 @app.route('/get/highest_trading_volume/<dates>/')
 def get_highest_trading_volume_with_url(dates):
-    return jsonify(str(application.get_highest_trading_volume(dates))), 200
+    return json.dumps(application.get_highest_trading_volume(dates), sort_keys=False, indent=4), 200
 
 @app.route('/get/buy_and_sell_dates/<string:dates>/')
 def get_buy_and_sell_dates_with_url(dates):
-    return jsonify(str(application.get_buy_and_sell_dates(dates))), 200"""
+    return json.dumps(application.get_buy_and_sell_dates(dates), sort_keys=False, indent=4), 200"""
 
 if __name__ == "__main__":
     app.run()

@@ -75,7 +75,6 @@
 #How to get the data:
 from datetime import datetime, timezone
 from pycoingecko import CoinGeckoAPI
-import json
 cg = CoinGeckoAPI()
 
 #missions
@@ -146,6 +145,7 @@ class Application:
 
         return returnable_data
 
+    # IMPORTANT THIS FUNCTION ADDS 2 HOURS FOR SOME REASON!
     # Function that changes string containing two dates into tuple that contains two timestamps
     def get_dates(self, date: str):
         year1 = f"{date[6]}{date[7]}{date[8]}{date[9]}"
@@ -190,6 +190,109 @@ class Application:
         date = datetime.fromtimestamp(timestamp)
         return date
 
+    # If recursion it maybe better to use self.list
+    # Function that returns lowest and highest prices from given input if the conditions are right
+    def get_accebtable_lowest_and_highest_prices(self, dates: str):
+
+        all_prices = []
+        chosen_prices = []
+        count = 0
+
+        date1 = self.get_dates(dates)[0]
+        date2 = self.get_dates(dates)[1]
+
+        if date1 > date2:
+            
+            text = "Incorrect input"
+
+            return self.incorrect_input_to_json_form(tuple((text, dates, self.get_dates(dates)[0],
+            self.get_dates(dates)[1])))
+
+        now = datetime.now()
+
+        if date2 != now.strftime("%d-%b-%Y (%H:%M:%S.%f)"):
+            date2 += 3600
+
+        data = cg.get_coin_market_chart_range_by_id(id='bitcoin', vs_currency='eur', from_timestamp=date1, to_timestamp=date2)
+
+        for price in data["prices"]:
+            all_prices.append(price[1])
+
+        lowest = "buy", date1, 1000000000
+
+        while count < len(all_prices):
+            if all_prices[count] < lowest[2]:
+                lowest = "buy", date1, all_prices[count]
+            date1 += 3600
+            count += 1
+
+        data2 = cg.get_coin_market_chart_range_by_id(id='bitcoin', vs_currency='eur', from_timestamp=lowest[1], to_timestamp=date2)
+        
+        for price in data2["prices"]:
+            chosen_prices.append(price[1])
+        
+        count = 0
+        date1 = lowest[1]
+        highest = "sell", date1, 0
+
+        while count < len(chosen_prices):
+            if chosen_prices[count] > highest[2]:
+                highest = "sell", date1, chosen_prices[count]
+            date1 += 3600
+            count += 1
+
+        if highest[2] < lowest[2]:
+
+
+            # change dates to correct form
+
+            return self.get_accebtable_lowest_and_highest_prices(dates)
+        
+        elif highest[2] == lowest[2]:
+
+            text = "Don't buy"
+
+            return self.bad_time_to_buy_to_json_form(tuple((text, dates, self.get_dates(dates)[0],
+            self.get_dates(dates)[1], lowest[1], self.get_highest_price(dates)[0], 
+            int(lowest[2]), int(self.get_highest_price(dates)[1]))))
+
+        else:
+
+            text = f"{self.convert_timestamp_to_date(lowest[1])}, {self.convert_timestamp_to_date(highest[1])}"
+
+            return self.buy_and_sell_dates_to_json_form(tuple((text, dates, self.get_dates(dates)[0],
+            self.get_dates(dates)[1], lowest[1], highest[1], 
+            int(lowest[2]), int(highest[2]))))
+
+    # Function that returns highest price from given input
+    def get_highest_price(self, dates: str):
+
+        all_prices = []
+        count = 0
+
+        date1 = self.get_dates(dates)[0]
+        date2 = self.get_dates(dates)[1]
+
+        now = datetime.now()
+
+        if date2 != now.strftime("%d-%b-%Y (%H:%M:%S.%f)"):
+            date2 += 3600
+
+        data = cg.get_coin_market_chart_range_by_id(id='bitcoin', vs_currency='eur', from_timestamp=date1, to_timestamp=date2)
+
+        for price in data["prices"]:
+            all_prices.append(price[1])
+
+        highest = date1, 0
+
+        while count < len(all_prices):
+            if all_prices[count] > highest[1]:
+                highest = date1, all_prices[count]
+            date1 += 3600
+            count += 1
+
+        return highest
+
     # Function that returns data from incorrect input in json form
     def incorrect_input_to_json_form(self, data):
         dictionary = {}
@@ -206,12 +309,43 @@ class Application:
                             case "input":
                                 dictionary2[copy] = data[1]
                             case "first_date":
-                                dictionary2[copy] = data[2]
+                                dictionary2[copy] = self.convert_timestamp_to_date(data[2])
                             case "second_date":
-                                dictionary2[copy] = data[3]
+                                dictionary2[copy] = self.convert_timestamp_to_date(data[3])
                     dictionary[option] = dictionary2
 
-        return json.dumps(dictionary, sort_keys=False, indent=4, default=str)
+        return dictionary
+
+    # Function that returns data in JSON form from input that didn't have a good time to buy bitcoin thus neither sell it
+    def bad_time_to_buy_to_json_form(self, data):
+        dictionary = {}
+        dictionary2 = {}
+        options = ["text", "input", "first_date", "second_date", "lowest_price_date", "highest_price_date", "lowest_price", "highest_price", "data"]
+
+        for option in options:
+            match option:
+                case "text":
+                    dictionary[option] = data[0]
+                case "data":
+                    for copy in options:
+                        match copy:
+                            case "input":
+                                dictionary2[copy] = data[1]
+                            case "first_date":
+                                dictionary2[copy] = self.convert_timestamp_to_date(data[2])
+                            case "second_date":
+                                dictionary2[copy] = self.convert_timestamp_to_date(data[3])
+                            case "highest_price_date":
+                                dictionary2[copy] = self.convert_timestamp_to_date(data[4])
+                            case "lowest_price_date":
+                                dictionary2[copy] = self.convert_timestamp_to_date(data[5])
+                            case "highest_price":
+                                dictionary2[copy] = data[6]
+                            case "lowest_price":
+                                dictionary2[copy] = data[7]
+                    dictionary[option] = dictionary2
+
+        return dictionary
 
     # Function that returns downward trend data in json form
     def downward_trend_to_json_form(self, data):
@@ -229,14 +363,14 @@ class Application:
                             case "input":
                                 dictionary2[copy] = data[1]
                             case "first_date":
-                                dictionary2[copy] = data[2]
+                                dictionary2[copy] = self.convert_timestamp_to_date(data[2])
                             case "second_date":
-                                dictionary2[copy] = data[3]
+                                dictionary2[copy] = self.convert_timestamp_to_date(data[3])
                             case "days":
                                 dictionary2[copy] = f"{data[4]} days"
                     dictionary[option] = dictionary2
 
-        return json.dumps(dictionary, sort_keys=False, indent=4, default=str)
+        return dictionary
 
     # Function that returns highest trading volume data in json form
     def highest_trading_volume_to_json_form(self, data):
@@ -254,16 +388,16 @@ class Application:
                             case "input":
                                 dictionary2[copy] = data[1]
                             case "first_date":
-                                dictionary2[copy] = data[2]
+                                dictionary2[copy] = self.convert_timestamp_to_date(data[2])
                             case "second_date":
-                                dictionary2[copy] = data[3]
+                                dictionary2[copy] = self.convert_timestamp_to_date(data[3])
                             case "highest_trading_volume_date":
-                                dictionary2[copy] = data[4]
+                                dictionary2[copy] = self.convert_timestamp_to_date(data[4])
                             case "highest_trading_volume":
                                 dictionary2[copy] = data[5]
                     dictionary[option] = dictionary2
 
-        return json.dumps(dictionary, sort_keys=False, indent=4, default=str)
+        return dictionary
     
     # Function that returns buy and sell date data in json form
     def buy_and_sell_dates_to_json_form(self, data):
@@ -281,23 +415,23 @@ class Application:
                             case "input":
                                 dictionary2[copy] = data[1]
                             case "first_date":
-                                dictionary2[copy] = data[2]
+                                dictionary2[copy] = self.convert_timestamp_to_date(data[2])
                             case "second_date":
-                                dictionary2[copy] = data[3]
+                                dictionary2[copy] = self.convert_timestamp_to_date(data[3])
                             case "buy_date":
-                                dictionary2[copy] = data[4]
+                                dictionary2[copy] = self.convert_timestamp_to_date(data[4])
                             case "sell_date":
-                                dictionary2[copy] = data[5]
+                                dictionary2[copy] = self.convert_timestamp_to_date(data[5])
                             case "buy_price":
                                 dictionary2[copy] = data[6]
                             case "sell_price":
                                 dictionary2[copy] = data[7]
                     dictionary[option] = dictionary2
 
-        return json.dumps(dictionary, sort_keys=False, indent=4, default=str)
+        return dictionary
 
-    #Downward trend
-    #Funktion that returns biggest downward trend from the given dates
+    # Downward trend
+    # Function that returns biggest downward trend from the given dates
     def get_downward_trend(self, dates: str):
 
         all_prices = []
@@ -312,8 +446,8 @@ class Application:
         if date1 > date2:
             text = "Incorrect input"
 
-            return self.incorrect_input_to_json_form(tuple((text, dates, self.convert_timestamp_to_date(self.get_dates(dates)[0]),
-            self.convert_timestamp_to_date(self.get_dates(dates)[1]))))
+            return self.incorrect_input_to_json_form(tuple((text, dates, self.get_dates(dates)[0],
+            self.get_dates(dates)[1])))
 
         now = datetime.now()
 
@@ -351,18 +485,20 @@ class Application:
 
         return self.downward_trend_to_json_form(tuple((text, dates, self.get_dates(dates)[0], self.get_dates(dates)[1], most)))
 
-    #HighestTradingVolume
-    #Funktion that returns HighestTradingVolume from the given dates
+    # HighestTradingVolume
+    # Function that returns HighestTradingVolume from the given dates
     def get_highest_trading_volume(self, dates: str):
 
         date1 = self.get_dates(dates)[0]
         date2 = self.get_dates(dates)[1]
 
+        print(self.convert_timestamp_to_date(date1))
+
         if date1 > date2:
             text = "Incorrect input"
 
-            return self.incorrect_input_to_json_form(tuple((text, dates, self.convert_timestamp_to_date(self.get_dates(dates)[0]),
-            self.convert_timestamp_to_date(self.get_dates(dates)[1]))))
+            return self.incorrect_input_to_json_form(tuple((text, dates, self.get_dates(dates)[0],
+            self.get_dates(dates)[1])))
 
         now = datetime.now()
 
@@ -373,18 +509,18 @@ class Application:
         highest = date1, 0
 
         for volume in data["total_volumes"]:
-            if volume[1] > highest[0]:
+            if volume[1] > highest[1]:
                 highest = date1, volume[1]
             date1 += 3600
 
         text = f"{self.convert_timestamp_to_date(highest[0])}:{highest[1]}"
 
-        return self.highest_trading_volume_to_json_form(tuple((text, dates, self.convert_timestamp_to_date(self.get_dates(dates)[0]), 
-        self.convert_timestamp_to_date(self.get_dates(dates)[1]), self.convert_timestamp_to_date(highest[0]), highest[1])))
+        return self.highest_trading_volume_to_json_form(tuple((text, dates, self.get_dates(dates)[0], 
+        self.get_dates(dates)[1], highest[0], highest[1])))
 
-    #TimeMachine
-    #if more than 6 days +1 hour
-    #Funktion that returns the best dates to buy and sell bitcoin from the given dates
+    # TimeMachine
+    # if more than 6 days +1 hour
+    # Function that returns the best dates to buy and sell bitcoin from the given dates
     def get_buy_and_sell_dates(self, dates: str):
 
         all_prices = []
@@ -398,8 +534,8 @@ class Application:
             
             text = "Incorrect input"
 
-            return self.incorrect_input_to_json_form(tuple((text, dates, self.convert_timestamp_to_date(self.get_dates(dates)[0]),
-            self.convert_timestamp_to_date(self.get_dates(dates)[1]))))
+            return self.incorrect_input_to_json_form(tuple((text, dates, self.get_dates(dates)[0],
+            self.get_dates(dates)[1])))
 
         now = datetime.now()
 
@@ -434,25 +570,25 @@ class Application:
             date1 += 3600
             count += 1
 
-        if highest[2] < lowest[2]:
+        if highest[2] <= lowest[2]:
 
             text = "Don't buy"
 
-            return self.buy_and_sell_dates_to_json_form(tuple((text, dates, self.convert_timestamp_to_date(self.get_dates(dates)[0]),
-            self.convert_timestamp_to_date(self.get_dates(dates)[1]), self.convert_timestamp_to_date(lowest[1]), self.convert_timestamp_to_date(highest[1]), 
-            int(lowest[2]), int(highest[2]))))
+            return self.bad_time_to_buy_to_json_form(tuple((text, dates, self.get_dates(dates)[0],
+            self.get_dates(dates)[1], lowest[1], self.get_highest_price(dates)[0], 
+            int(lowest[2]), int(self.get_highest_price(dates)[1]))))
         else:
 
             text = f"{self.convert_timestamp_to_date(lowest[1])}, {self.convert_timestamp_to_date(highest[1])}"
 
-            return self.buy_and_sell_dates_to_json_form(tuple((text, dates, self.convert_timestamp_to_date(self.get_dates(dates)[0]),
-            self.convert_timestamp_to_date(self.get_dates(dates)[1]), self.convert_timestamp_to_date(lowest[1]), self.convert_timestamp_to_date(highest[1]), 
+            return self.buy_and_sell_dates_to_json_form(tuple((text, dates, self.get_dates(dates)[0],
+            self.get_dates(dates)[1], lowest[1], highest[1], 
             int(lowest[2]), int(highest[2]))))
 
-    #TimeMachine
-    #remember to add 1 hour to the to_timestamp
-    #Think how to make this more simple
-    #Funktion that returns the best dates to buy and sell bitcoin from the given dates
+    # TimeMachine
+    # remember to add 1 hour to the to_timestamp
+    # Think how to make this more simple
+    # Function that returns the best dates to buy and sell bitcoin from the given dates
     def get_buy_and_sell_dates_2(self, dates: str):
 
         chosen_prices = []
@@ -465,8 +601,8 @@ class Application:
 
             text = "Incorrect input"
 
-            return self.incorrect_input_to_json_form(tuple((text, dates, self.convert_timestamp_to_date(self.get_dates(dates)[0]),
-            self.convert_timestamp_to_date(self.get_dates(dates)[1]))))
+            return self.incorrect_input_to_json_form(tuple((text, dates, self.get_dates(dates)[0],
+            self.get_dates(dates)[1])))
 
         lowest = "buy", date1, 1000000000
 
@@ -490,27 +626,30 @@ class Application:
             date1 += 3600
             count += 1
 
-        if highest[2] < lowest[2]:
+        if highest[2] <= lowest[2]:
 
             text = "Don't buy"
 
-            return self.buy_and_sell_dates_to_json_form(tuple((text, dates, self.convert_timestamp_to_date(self.get_dates(dates)[0]),
-            self.convert_timestamp_to_date(self.get_dates(dates)[1]), self.convert_timestamp_to_date(lowest[1]), self.convert_timestamp_to_date(highest[1]), 
+            return self.buy_and_sell_dates_to_json_form(tuple((text, dates, self.get_dates(dates)[0],
+            self.get_dates(dates)[1], lowest[1], highest[1], 
             int(lowest[2]), int(highest[2]))))
         else:
 
             text = f"{self.convert_timestamp_to_date(lowest[1])}, {self.convert_timestamp_to_date(highest[1])}"
 
-            return self.buy_and_sell_dates_to_json_form(tuple((text, dates, self.convert_timestamp_to_date(self.get_dates(dates)[0]),
-            self.convert_timestamp_to_date(self.get_dates(dates)[1]), self.convert_timestamp_to_date(lowest[1]), self.convert_timestamp_to_date(highest[1]), 
+            return self.buy_and_sell_dates_to_json_form(tuple((text, dates, self.get_dates(dates)[0],
+            self.get_dates(dates)[1], lowest[1], highest[1], 
             int(lowest[2]), int(highest[2]))))
 
 if __name__ == "__main__":
     application = Application()
 
-    print(application.get_downward_trend("25-11-2021|30-11-2021"))
+    #application.get_data_1("25-11-2021", "30-11-2021")
+    #print(application.get_buy_and_sell_dates("25-11-2021|30-11-2021"))
+    #print(application.get_downward_trend("25-11-2021|30-11-2021"))
     print(application.get_highest_trading_volume("25-11-2021|30-11-2021"))
-    print(application.get_buy_and_sell_dates("25-11-2021|30-11-2021"))
+    #print(application.get_buy_and_sell_dates("25-11-2021|30-11-2021"))
+    #print(application.get_highest_price("25-11-2021|30-11-2021"))
 
     #Funktions used in the application
     #----------------------------------------------------

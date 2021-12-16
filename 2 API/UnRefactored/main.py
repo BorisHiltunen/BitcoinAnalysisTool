@@ -90,6 +90,8 @@ cg = CoinGeckoAPI()
 class Application:
     def __init__(self):
         self.data = []
+        self.sums = []
+        self.amount = 0
 
     # Function for getting data with start and finish dates
     def get_data_1(self, start: str, finish: str):
@@ -190,9 +192,99 @@ class Application:
         date = datetime.fromtimestamp(timestamp)
         return date
 
+    def converted_date_to_correct_form(self, date: str):
+        year = f"{date[0]}{date[1]}{date[2]}{date[3]}"
+        month = f"{date[5]}{date[6]}"
+        day = f"{date[8]}{date[9]}"
+
+        return f"{day}-{month}-{year}"
+
+    # Function for getting data with start and finish dates
+    def update_data(self, dates: str):
+
+        prices = []
+        total_volumes = []
+        count = 0
+        self.data = []
+
+        date1 = self.get_dates(dates)[0]
+        date2 = self.get_dates(dates)[1]
+
+        if date1 > date2:
+            
+            text = "Incorrect input"
+
+            return self.incorrect_input_to_json_form(tuple((text, dates, self.get_dates(dates)[0],
+            self.get_dates(dates)[1])))
+
+        now = datetime.now()
+
+        if date2 != now.strftime("%d-%b-%Y (%H:%M:%S.%f)"):
+            date2 += 3600
+
+        data = cg.get_coin_market_chart_range_by_id(id='bitcoin', vs_currency='eur', from_timestamp=date1, to_timestamp=date2)
+
+        for price in data["prices"]:
+            prices.append((date1, price[1]))
+        for price in data["total_volumes"]:
+            total_volumes.append((date1, price[1]))
+
+        while count < len(prices):
+            self.data.append(tuple((date1, prices[count], total_volumes[count])))
+            date1 += 3600
+            count += 1
+
+    # now the function finds the lowest and highest price
+    # only problem is that 
+
+    # Testing recursion
+    def testing_new_method(self, dates: str):
+
+        self.update_data(dates)
+
+        count = 0
+
+        lowest = "buy", self.data[0][0], 1000000000
+
+        while count < len(self.data):
+            if self.data[count][1][1] < lowest[2]:
+                lowest = "buy", self.data[count][0], self.data[count][1][1]
+            count += 1
+        
+        # new start time for the time to sell
+        new_date = str(self.convert_timestamp_to_date(lowest[1]))[:-9]
+        new_date_correct_form = self.converted_date_to_correct_form(new_date)
+
+        # new end time for the time to buy
+        end_timestamp = self.get_dates(dates)[1]
+        end_date = str(self.convert_timestamp_to_date(end_timestamp))[:-9]
+        end_date_correct_form = self.converted_date_to_correct_form(end_date)
+
+        new_dates = f"{new_date_correct_form}|{end_date_correct_form}"
+
+        self.update_data(new_dates)
+
+        count = 0
+        highest = "sell", lowest[1], 0
+
+        while count < len(self.data):
+            if self.data[count][1][1] > highest[2]:
+                highest = "sell", self.data[count][0], self.data[count][1][1]
+            count += 1
+
+        #Add dates, buyprice and sellprice
+
+        if len(self.sums) == self.data:
+            return self.sums
+        else:
+            sum = highest[2]-lowest[2]
+            self.sums.append(sum)
+            return "again"
+            #return self.testing_new_method(dates)
+        
     # If recursion it maybe better to use self.list
     # Function that returns lowest and highest prices from given input if the conditions are right
-    def get_accebtable_lowest_and_highest_prices(self, dates: str):
+    def get_accebtable_lowest_and_highest_prices(self, dates: str, used_dates):
 
         all_prices = []
         chosen_prices = []
@@ -216,53 +308,107 @@ class Application:
         data = cg.get_coin_market_chart_range_by_id(id='bitcoin', vs_currency='eur', from_timestamp=date1, to_timestamp=date2)
 
         for price in data["prices"]:
-            all_prices.append(price[1])
+            if date1 in used_dates:
+                continue
+            else:
+                all_prices.append((date1, price[1]))
+            date1 += 3600
 
         lowest = "buy", date1, 1000000000
 
         while count < len(all_prices):
-            if all_prices[count] < lowest[2]:
-                lowest = "buy", date1, all_prices[count]
-            date1 += 3600
+            if all_prices[count][1] < lowest[2]:
+                lowest = "buy", all_prices[count][0], all_prices[count][1]
             count += 1
+        
+        used_dates.append(lowest[1])
 
         data2 = cg.get_coin_market_chart_range_by_id(id='bitcoin', vs_currency='eur', from_timestamp=lowest[1], to_timestamp=date2)
+
+        date1 = lowest[1]
         
         for price in data2["prices"]:
-            chosen_prices.append(price[1])
-        
+            chosen_prices.append((date1, price[1]))
+            date1 += 3600
+
         count = 0
-        date1 = lowest[1]
         highest = "sell", date1, 0
 
         while count < len(chosen_prices):
-            if chosen_prices[count] > highest[2]:
-                highest = "sell", date1, chosen_prices[count]
-            date1 += 3600
+            if chosen_prices[count][1] > highest[2]:
+                highest = "sell", chosen_prices[count][0], chosen_prices[count][1]
             count += 1
 
-        if highest[2] < lowest[2]:
+        # to do
 
+        # it is needed to go through the whole time period and compare the differences between the prices
+        # downward trend to when highest is before
 
-            # change dates to correct form
+        # Options 
 
-            return self.get_accebtable_lowest_and_highest_prices(dates)
+        # buy 
+        # we can find lowest and highest prices
+
+        # haven't decided yet
+        # we find lowest price point but highest is behind
+
+        if highest[1] < lowest[1]:
+
+            #WRONG
+            # YOU HAVE TO TAKE DAYS INTO CONSIDERATION NOT HOURS
+            # so don't use len(all_prices) but something else
+
+            # dont buy
+            # wholeway is just downtrend
+            if self.get_downward_trend(dates) == len(all_prices):
+
+                text = "Don't buy"
+
+                return self.bad_time_to_buy_to_json_form(tuple((text, dates, self.get_dates(dates)[0],
+                self.get_dates(dates)[1], lowest[1], self.get_highest_price(dates)[0], 
+                int(lowest[2]), int(self.get_highest_price(dates)[1]))))
+
+            # dont buy
+            # price is same wholeway through
+            if highest[2] == lowest[2]:
+
+                text = "Don't buy"
+
+                return self.bad_time_to_buy_to_json_form(tuple((text, dates, self.get_dates(dates)[0],
+                self.get_dates(dates)[1], lowest[1], self.get_highest_price(dates)[0], 
+                int(lowest[2]), int(self.get_highest_price(dates)[1]))))
+            
+            # think still because there still might be a good opportunity
+            else:
+
+                return self.get_accebtable_lowest_and_highest_prices(dates, used_dates)
         
-        elif highest[2] == lowest[2]:
-
-            text = "Don't buy"
-
-            return self.bad_time_to_buy_to_json_form(tuple((text, dates, self.get_dates(dates)[0],
-            self.get_dates(dates)[1], lowest[1], self.get_highest_price(dates)[0], 
-            int(lowest[2]), int(self.get_highest_price(dates)[1]))))
-
         else:
 
-            text = f"{self.convert_timestamp_to_date(lowest[1])}, {self.convert_timestamp_to_date(highest[1])}"
+            # dont buy
+            # price is same wholeway through
+            if highest[2] == lowest[2]:
 
-            return self.buy_and_sell_dates_to_json_form(tuple((text, dates, self.get_dates(dates)[0],
-            self.get_dates(dates)[1], lowest[1], highest[1], 
-            int(lowest[2]), int(highest[2]))))
+                text = "Don't buy"
+
+                return self.bad_time_to_buy_to_json_form(tuple((text, dates, self.get_dates(dates)[0],
+                self.get_dates(dates)[1], lowest[1], self.get_highest_price(dates)[0], 
+                int(lowest[2]), int(self.get_highest_price(dates)[1]))))
+
+            # Continue this later but you could just use this method as a funktion
+            
+            else:
+
+                self.sum = highest[2]-lowest[2]
+                self.sums.append(self.sum)
+
+                #if 
+
+                #text = f"{self.convert_timestamp_to_date(lowest[1])}, {self.convert_timestamp_to_date(highest[1])}"
+
+                #return self.buy_and_sell_dates_to_json_form(tuple((text, dates, self.get_dates(dates)[0],
+                #self.get_dates(dates)[1], lowest[1], highest[1], 
+                #int(lowest[2]), int(highest[2]))))
 
     # Function that returns highest price from given input
     def get_highest_price(self, dates: str):
@@ -644,10 +790,14 @@ class Application:
 if __name__ == "__main__":
     application = Application()
 
+    # Will be needed
+    #print(str(self.convert_timestamp_to_date(date1))[:-9])
+    print(application.testing_new_method("26-11-2021|27-11-2021"))
+    #print(application.get_accebtable_lowest_and_highest_prices("26-11-2021|27-11-2021", []))
     #application.get_data_1("25-11-2021", "30-11-2021")
     #print(application.get_buy_and_sell_dates("25-11-2021|30-11-2021"))
     #print(application.get_downward_trend("25-11-2021|30-11-2021"))
-    print(application.get_highest_trading_volume("25-11-2021|30-11-2021"))
+    #print(application.get_highest_trading_volume("25-11-2021|30-11-2021"))
     #print(application.get_buy_and_sell_dates("25-11-2021|30-11-2021"))
     #print(application.get_highest_price("25-11-2021|30-11-2021"))
 

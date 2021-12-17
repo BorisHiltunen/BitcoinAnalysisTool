@@ -90,6 +90,7 @@ cg = CoinGeckoAPI()
 class Application:
     def __init__(self):
         self.data = []
+        self.buy_date_indices = []
         self.sums = []
         self.amount = 0
 
@@ -238,49 +239,56 @@ class Application:
     # only problem is that 
 
     # Testing recursion
-    def testing_new_method(self, dates: str):
-
-        self.update_data(dates)
+    def get_price_differences(self):
 
         count = 0
 
-        lowest = "buy", self.data[0][0], 1000000000
+        lowest = "buy", self.data[0][0], 1000000000, 0
 
         while count < len(self.data):
-            if self.data[count][1][1] < lowest[2]:
-                lowest = "buy", self.data[count][0], self.data[count][1][1]
+            if count in self.buy_date_indices:
+                count += 1
+                continue
+            else:
+                if self.data[count][1][1] < lowest[2]:
+                    lowest = "buy", self.data[count][0], self.data[count][1][1], count
             count += 1
-        
-        # new start time for the time to sell
-        new_date = str(self.convert_timestamp_to_date(lowest[1]))[:-9]
-        new_date_correct_form = self.converted_date_to_correct_form(new_date)
 
-        # new end time for the time to buy
-        end_timestamp = self.get_dates(dates)[1]
-        end_date = str(self.convert_timestamp_to_date(end_timestamp))[:-9]
-        end_date_correct_form = self.converted_date_to_correct_form(end_date)
-
-        new_dates = f"{new_date_correct_form}|{end_date_correct_form}"
-
-        self.update_data(new_dates)
+        self.buy_date_indices.append(lowest[3])
 
         count = 0
         highest = "sell", lowest[1], 0
 
         while count < len(self.data):
-            if self.data[count][1][1] > highest[2]:
-                highest = "sell", self.data[count][0], self.data[count][1][1]
+            
+            if count < lowest[3]:
+                count += 1
+                continue
+            else:
+                if self.data[count][1][1] > highest[2]:
+                    highest = "sell", self.data[count][0], self.data[count][1][1]
             count += 1
 
         #Add dates, buyprice and sellprice
-
-        if len(self.sums) == self.data:
-            return self.sums
+        if len(self.sums) == len(self.data):
+            #return len(self.sums), self.sums, self.sums[2], self.convert_timestamp_to_date(self.sums[2][0][1]), self.convert_timestamp_to_date(self.sums[2][1][1])
+            return self.sums[0][0]
         else:
             sum = highest[2]-lowest[2]
-            self.sums.append(sum)
-            return "again"
-            #return self.testing_new_method(dates)
+            self.sums.append((lowest, highest, sum))
+            #return "again"
+            return self.get_price_differences()
+
+    #It is needed to edit this
+    # Function for getting the best days to buy and sell bitcoin
+    def get_best_days_to_buy_and_sell(self):
+        lowest = self.sums[0]
+        for difference in self.get_price_differences():
+            if difference[3] > lowest:
+                highest = difference
+
+        return highest
+
         
     # If recursion it maybe better to use self.list
     # Function that returns lowest and highest prices from given input if the conditions are right
@@ -790,9 +798,11 @@ class Application:
 if __name__ == "__main__":
     application = Application()
 
+    application.update_data("26-11-2021|27-11-2021")
+    print(application.get_price_differences())
+
     # Will be needed
     #print(str(self.convert_timestamp_to_date(date1))[:-9])
-    print(application.testing_new_method("26-11-2021|27-11-2021"))
     #print(application.get_accebtable_lowest_and_highest_prices("26-11-2021|27-11-2021", []))
     #application.get_data_1("25-11-2021", "30-11-2021")
     #print(application.get_buy_and_sell_dates("25-11-2021|30-11-2021"))

@@ -272,9 +272,9 @@ class Application:
         #Add dates, buyprice and sellprice
         if len(self.sums) == len(self.data):
             #return len(self.sums), self.sums, self.sums[2], self.convert_timestamp_to_date(self.sums[2][0][1]), self.convert_timestamp_to_date(self.sums[2][1][1])
-            print(len(self.sums), self.sums, self.sums[2], self.convert_timestamp_to_date(self.sums[2][0][1]), self.convert_timestamp_to_date(self.sums[2][1][1]))
-            print(self.sums[0][0])
-            return self.sums[0]
+            #print(len(self.sums), self.sums, self.sums[2], self.convert_timestamp_to_date(self.sums[2][0][1]), self.convert_timestamp_to_date(self.sums[2][1][1]))
+            #print(self.sums[0][0])
+            return self.sums
         else:
             sum = highest[2]-lowest[2]
             self.sums.append((lowest, highest, sum))
@@ -284,15 +284,14 @@ class Application:
     #It is needed to edit this
     # Function for getting the best days to buy and sell bitcoin
     def get_best_days_to_buy_and_sell(self):
-        lowest = (('buy', 1637971200.0, 1000000000.0, 24), ('sell', 1637971200.0, 0.0), 0.0)
-        print(f"here {lowest[0][2]}")
+        both = (('buy', 1637971200.0, 1000000000.0, 24), ('sell', 1637971200.0, 0.0, 24), 0.0)
+        #print(f"here {lowest[0][2]}")
 
-        #Think what is best iteration target
         for difference in self.get_price_differences():
-            if difference[1] < lowest[0][2]:
-                lowest = difference
+            if difference[2] > both[2]:
+                both = difference
 
-        return lowest
+        return both
 
     # Function that returns data from incorrect input in json form
     def incorrect_input_to_json_form(self, data):
@@ -492,8 +491,6 @@ class Application:
 
         date1 = self.get_dates(dates)[0]
         date2 = self.get_dates(dates)[1]
-
-        print(self.convert_timestamp_to_date(date1))
 
         if date1 > date2:
             text = "Incorrect input"

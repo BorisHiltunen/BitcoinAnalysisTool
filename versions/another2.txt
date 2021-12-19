@@ -1,0 +1,66 @@
+    # TimeMachine
+    # if more than 6 days +1 hour
+    # Function that returns the best dates to buy and sell bitcoin from the given dates
+    def get_buy_and_sell_dates(self, dates: str):
+
+        all_prices = []
+        chosen_prices = []
+        count = 0
+
+        date1 = self.get_dates(dates)[0]
+        date2 = self.get_dates(dates)[1]
+
+        if date1 > date2:
+            
+            text = "Incorrect input"
+
+            return self.incorrect_input_to_json_form(tuple((text, dates, self.get_dates(dates)[0],
+            self.get_dates(dates)[1])))
+
+        now = datetime.now()
+
+        if date2 != now.strftime("%d-%b-%Y (%H:%M:%S.%f)"):
+            date2 += 3600
+
+        data = cg.get_coin_market_chart_range_by_id(id='bitcoin', vs_currency='eur', from_timestamp=date1, to_timestamp=date2)
+
+        for price in data["prices"]:
+            all_prices.append(price[1])
+
+        lowest = "buy", date1, 1000000000
+
+        while count < len(all_prices):
+            if all_prices[count] < lowest[2]:
+                lowest = "buy", date1, all_prices[count]
+            date1 += 3600
+            count += 1
+
+        data2 = cg.get_coin_market_chart_range_by_id(id='bitcoin', vs_currency='eur', from_timestamp=lowest[1], to_timestamp=date2)
+        
+        for price in data2["prices"]:
+            chosen_prices.append(price[1])
+        
+        count = 0
+        date1 = lowest[1]
+        highest = "sell", date1, 0
+
+        while count < len(chosen_prices):
+            if chosen_prices[count] > highest[2]:
+                highest = "sell", date1, chosen_prices[count]
+            date1 += 3600
+            count += 1
+
+        if highest[2] <= lowest[2]:
+
+            text = "Don't buy"
+
+            return self.bad_time_to_buy_to_json_form(tuple((text, dates, self.get_dates(dates)[0],
+            self.get_dates(dates)[1], lowest[1], self.get_highest_price(dates)[0], 
+            int(lowest[2]), int(self.get_highest_price(dates)[1]))))
+        else:
+
+            text = f"{self.convert_timestamp_to_date(lowest[1])}, {self.convert_timestamp_to_date(highest[1])}"
+
+            return self.buy_and_sell_dates_to_json_form(tuple((text, dates, self.get_dates(dates)[0],
+            self.get_dates(dates)[1], lowest[1], highest[1], 
+            int(lowest[2]), int(highest[2]))))

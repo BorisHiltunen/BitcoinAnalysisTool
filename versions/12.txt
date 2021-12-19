@@ -94,20 +94,16 @@ class Application:
         self.sums = []
         self.amount = 0
         self.incorrect_input = False
-        self.count = 0
 
     # 1 Getting data
     # Function for getting data with start and finish dates
     def update_data(self, dates: str):
-        self.count += 1
 
         prices = []
         total_volumes = []
         count = 0
-        #print(f"{self.count} and a long text to see where we are {self.data}")
-        print(f"before {len(self.data)}")
+        print(f"this {self.data}")
         self.data = []
-        print(len(self.data))
 
         date1 = self.get_timestamps_from_dates(dates)[0]
         date2 = self.get_timestamps_from_dates(dates)[1]
@@ -131,11 +127,16 @@ class Application:
         for price in data["total_volumes"]:
             total_volumes.append(price[1])
 
+        #for price in data["prices"]:
+        #    prices.append((date1, price[1]))
+        #for price in data["total_volumes"]:
+        #    total_volumes.append((date1, price[1]))
+
+
         while count < len(prices):
             self.data.append(tuple((date1, prices[count], total_volumes[count], dates)))
             date1 += 3600
             count += 1
-        print(f"after {len(self.data)}")
 
     # IMPORTANT THIS FUNCTION ADDS 2 HOURS FOR SOME REASON!
     # Function that changes string containing two dates into tuple that contains two timestamps
@@ -242,8 +243,8 @@ class Application:
         highest = "", 0.0
 
         for volume in self.data:
-            if volume[2] > highest[1]:
-                highest = volume[0], volume[2]
+            if volume[2][1] > highest[1]:
+                highest = volume[2][0], volume[2][1]
 
         # Think about how to express this
         text = f"{str(self.convert_timestamp_to_date(highest[0]))[:10]}:{highest[1]}"
@@ -263,8 +264,8 @@ class Application:
                 count += 1
                 continue
             else:
-                if self.data[count][1] < lowest[2]:
-                    lowest = "buy", self.data[count][0], self.data[count][1], count
+                if self.data[count][1][1] < lowest[2]:
+                    lowest = "buy", self.data[count][0], self.data[count][1][1], count
             count += 1
 
         self.buy_date_indices.append(lowest[3])
@@ -273,12 +274,13 @@ class Application:
         highest = "sell", lowest[1], 0
 
         while count < len(self.data):
+            
             if count < lowest[3]:
                 count += 1
                 continue
             else:
-                if self.data[count][1] > highest[2]:
-                    highest = "sell", self.data[count][0], self.data[count][1]
+                if self.data[count][1][1] > highest[2]:
+                    highest = "sell", self.data[count][0], self.data[count][1][1]
             count += 1
 
         #Add dates, buyprice and sellprice
@@ -468,17 +470,8 @@ if __name__ == "__main__":
     application = Application()
 
     application.update_data("26-11-2021|28-11-2021")
-    #print("1.")
-    #print(application.get_downward_trend())
-    #print("2.")
-    #print(application.get_highest_trading_volume())
-    #print("3.")
-    print(application.get_best_days_to_buy_and_sell())
-
-    print("")
-
-    # Why doesn't this work
-    application.update_data("25-11-2021|26-11-2021")
+    #for now its not needed to use this here too since get_best_days_to_buy_and_sell function calls get price differences function
+    #print(application.get_price_differences())
     print("1.")
     print(application.get_downward_trend())
     print("2.")
@@ -486,17 +479,19 @@ if __name__ == "__main__":
     print("3.")
     print(application.get_best_days_to_buy_and_sell())
 
+    print("")
+
     #Funktions used in the application
     #----------------------------------------------------
-    #print("A")
-    #print(application.get_timestamps_from_dates("26-11-2021|28-11-2021"))
-    #print("B")
-    #print(application.correct_form_for_crypto("25-11-2021"))
-    #print("C")
-    #print(application.convert_timestamp_to_date(1257326176)) 
-    #print("D")
-    #print(application.converted_date_to_correct_form("2020-10-10"))
-    #print("")
+    print("A")
+    print(application.get_timestamps_from_dates("26-11-2021|28-11-2021"))
+    print("B")
+    print(application.correct_form_for_crypto("25-11-2021"))
+    print("C")
+    print(application.convert_timestamp_to_date(1257326176)) 
+    print("D")
+    print(application.converted_date_to_correct_form("2020-10-10"))
+    print("")
     #----------------------------------------------------
 
     #IMPORTANT
@@ -512,33 +507,35 @@ if __name__ == "__main__":
     #----------------------------------------------------
 
     #application.update_data("25-11-2021|30-11-2021")
+    application.update_data("26-11-2021|27-11-2021")
+    print(application.data)
 
     #A) mission Funktions (DownWardTrend)
-    #print("Downward")
-    #print(application.get_downward_trend())
+    print("Downward")
+    print(application.get_downward_trend())
 
-    #print("")
+    print("")
 
     #B) mission Funktions (HighestTradingVolume)
-    #print("HighestTradingVolume")
-    #print(application.get_highest_trading_volume())
+    print("HighestTradingVolume")
+    print(application.get_highest_trading_volume())
 
-    #print("")
+    print("")
 
     #C) mission Funktions (TimeMachine)
 
     #Buy and sell test
-    #print("whenToBuyAndSell")
+    print("whenToBuyAndSell")
     #print(application.get_best_days_to_buy_and_sell())
 
-    #print("")
+    print("")
 
     #Don't buy test
     #application.update_data("26-11-2021|27-11-2021")
     #print("don't buy")
     #print(application.get_best_days_to_buy_and_sell())
 
-    """print("")
+    print("")
 
     #Wrong input test
     application.update_data("25-11-2021|24-11-2021")
@@ -548,4 +545,4 @@ if __name__ == "__main__":
     print("2.")
     print(application.get_highest_trading_volume())
     print("3.")
-    print(application.get_best_days_to_buy_and_sell())"""
+    print(application.get_best_days_to_buy_and_sell())

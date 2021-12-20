@@ -223,6 +223,9 @@ class Application:
     # 2 getting price differences
     def get_price_differences(self):
 
+        print(len(self.data))
+        print(len(self.sums))
+
         count = 0
 
         lowest = "buy", self.data[0][0], 1000000000, 0
@@ -251,7 +254,7 @@ class Application:
             count += 1
 
         #Add dates, buyprice and sellprice
-        if len(self.sums) == len(self.data):
+        if len(self.sums) >= len(self.data):
             #return len(self.sums), self.sums, self.sums[2], self.convert_timestamp_to_date(self.sums[2][0][1]), self.convert_timestamp_to_date(self.sums[2][1][1])
             #print(self.sums[0][0])
             return self.sums
@@ -259,6 +262,7 @@ class Application:
             sum = highest[2]-lowest[2]
             self.sums.append((lowest, highest, sum))
             return self.get_price_differences()
+            #return self.data
 
     # 3 getting the best time to buy and sell
     # Function for getting the best days to buy and sell bitcoin
@@ -284,7 +288,6 @@ class Application:
             str(self.convert_timestamp_to_date(both[0][1]))[11:], str(self.convert_timestamp_to_date(both[1][1]))[11:], 
             int(both[0][2]), int(both[1][2]), both[2])))
         else:
-
             # Think about how to express this
             text = f"{self.convert_timestamp_to_date(both[0][1])}, {self.convert_timestamp_to_date(both[1][1])}"
 
@@ -449,24 +452,39 @@ if __name__ == "__main__":
     application = Application()
 
     #application.update_data("01-11-2021|02-11-2021")
-    application.update_data("25-11-2021|26-11-2021")
-    print("1.")
+    application.update_data("26-11-2021|28-11-2021")
+    print("first 1.")
     print(application.get_downward_trend())
     print("2.")
     print(application.get_highest_trading_volume())
     print("3.")
+    #print(application.get_price_differences())
+    #for price in application.get_price_differences():
+    #    print("1space1")
+    #    print(price)
+    #    print("1space2")
+    #print(application.get_price_differences())
     print(application.get_best_days_to_buy_and_sell())
 
     print("")
 
     # Why doesn't this work
-    #application.update_data("24-11-2021|25-11-2021")
-    #print("1.")
-    #print(application.get_downward_trend())
-    #print("2.")
-    #print(application.get_highest_trading_volume())
-    #print("3.")
-    #print(application.get_best_days_to_buy_and_sell())
+    application.update_data("25-11-2021|26-11-2021")
+    print("second 1.")
+    print(application.get_downward_trend())
+    print("2.")
+    print(application.get_highest_trading_volume())
+    print("3.")
+    #print(application.get_price_differences())
+    #for price in application.get_price_differences():
+    #    print("2space1")
+    #    print(price)
+    #    print("2space2")
+
+    #print(application.get_price_differences())
+    print(application.get_best_days_to_buy_and_sell())
+
+    print("")
 
     #Funktions used in the application
     #----------------------------------------------------

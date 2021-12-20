@@ -104,14 +104,19 @@ class Application:
         prices = []
         total_volumes = []
         count = 0
+        #print(f"{self.count} and a long text to see where we are {self.data}")
+        print(f"before {len(self.data)}")
         self.data = []
+        print(len(self.data))
 
         date1 = self.get_timestamps_from_dates(dates)[0]
         date2 = self.get_timestamps_from_dates(dates)[1]
 
         if date1 > date2:
             self.incorrect_input = True
+
             self.data.append(dates)
+
             return 
 
         now = datetime.now()
@@ -130,6 +135,7 @@ class Application:
             self.data.append(tuple((date1, prices[count], total_volumes[count], dates)))
             date1 += 3600
             count += 1
+        print(f"after {len(self.data)}")
 
     # IMPORTANT THIS FUNCTION ADDS 2 HOURS FOR SOME REASON!
     # Function that changes string containing two dates into tuple that contains two timestamps
@@ -155,11 +161,34 @@ class Application:
         utc_timestamp2 = utc_time2.timestamp()
 
         return utc_timestamp1, utc_timestamp2
+    
+    # Function that changes date into timestamp
+    def correct_form_for_crypto(self, date: str):
+        year = f"{date[6]}{date[7]}{date[8]}{date[9]}"
+        month = f"{date[3]}{date[4]}"
+        day = f"{date[0]}{date[1]}"
+
+        date_in_correct_form = f"{year}-{month}-{day} 00:00:00"
+
+        string_to_date = datetime.fromisoformat(date_in_correct_form)
+
+        utc_time = string_to_date.replace(tzinfo=timezone.utc)
+        utc_timestamp = utc_time.timestamp()
+
+        return utc_timestamp
 
     # Function that converts timestamp into a date
     def convert_timestamp_to_date(self, timestamp):
         date = datetime.fromtimestamp(timestamp)
         return date
+
+    # Function that returns converted date in the correct form
+    def converted_date_to_correct_form(self, date: str):
+        year = f"{date[0]}{date[1]}{date[2]}{date[3]}"
+        month = f"{date[5]}{date[6]}"
+        day = f"{date[8]}{date[9]}"
+
+        return f"{day}-{month}-{year}"
 
     # Downward trend
     # Function that returns biggest downward trend from the given dates
@@ -167,6 +196,7 @@ class Application:
 
         if self.incorrect_input == True:
             text = "Incorrect input"
+
             return self.incorrect_input_to_json_form(tuple((text, self.data)))
 
         chosen_prices = []
@@ -206,6 +236,7 @@ class Application:
 
         if self.incorrect_input == True:
             text = "Incorrect input"
+
             return self.incorrect_input_to_json_form(tuple((text, self.data)))
 
         highest = "", 0.0
@@ -215,7 +246,7 @@ class Application:
                 highest = volume[0], volume[2]
 
         # Think about how to express this
-        text = f"{str(self.convert_timestamp_to_date(highest[0]))[:10]}, {highest[1]}"
+        text = f"{str(self.convert_timestamp_to_date(highest[0]))[:10]}:{highest[1]}"
 
         return self.highest_trading_volume_to_json_form(tuple((text, self.data[0][3], self.data[0][3][:10], 
         self.data[0][3][11:], str(self.convert_timestamp_to_date(highest[0]))[:10], highest[1])))
@@ -253,14 +284,17 @@ class Application:
         #Add dates, buyprice and sellprice
         if len(self.sums) == len(self.data):
             #return len(self.sums), self.sums, self.sums[2], self.convert_timestamp_to_date(self.sums[2][0][1]), self.convert_timestamp_to_date(self.sums[2][1][1])
+            #print(len(self.sums), self.sums, self.sums[2], self.convert_timestamp_to_date(self.sums[2][0][1]), self.convert_timestamp_to_date(self.sums[2][1][1]))
             #print(self.sums[0][0])
             return self.sums
         else:
             sum = highest[2]-lowest[2]
             self.sums.append((lowest, highest, sum))
+            #return "again"
             return self.get_price_differences()
 
     # 3 getting the best time to buy and sell
+    #It is needed to edit this
     # Function for getting the best days to buy and sell bitcoin
     def get_best_days_to_buy_and_sell(self):
 
@@ -280,17 +314,15 @@ class Application:
             text = f"Don't buy"
 
             return self.buy_and_sell_dates_to_json_form(tuple((text, self.data[0][3], self.data[0][3][:10],
-            self.data[0][3][11:], str(self.convert_timestamp_to_date(both[0][1]))[:10], str(self.convert_timestamp_to_date(both[1][1]))[:10],
-            str(self.convert_timestamp_to_date(both[0][1]))[11:], str(self.convert_timestamp_to_date(both[1][1]))[11:], 
+            self.data[0][3][11:], str(self.convert_timestamp_to_date(both[0][1]))[:10], str(self.convert_timestamp_to_date(both[1][1]))[:10], 
             int(both[0][2]), int(both[1][2]), both[2])))
         else:
 
             # Think about how to express this
-            text = f"{self.convert_timestamp_to_date(both[0][1])}, {self.convert_timestamp_to_date(both[1][1])}"
+            text = f"{self.convert_timestamp_to_date(both[0][1])}, {self.convert_timestamp_to_date(both[0][1])}"
 
             return self.buy_and_sell_dates_to_json_form(tuple((text, self.data[0][3], self.data[0][3][:10],
             self.data[0][3][11:], str(self.convert_timestamp_to_date(both[0][1]))[:10], str(self.convert_timestamp_to_date(both[1][1]))[:10], 
-            str(self.convert_timestamp_to_date(both[0][1]))[11:], str(self.convert_timestamp_to_date(both[1][1]))[11:],
             int(both[0][2]), int(both[1][2]), both[2])))
 
     # Function that returns data from incorrect input in json form
@@ -320,8 +352,7 @@ class Application:
     def bad_time_to_buy_to_json_form(self, data):
         dictionary = {}
         dictionary2 = {}
-        options = ["text", "input", "first_date", "second_date", "buy_date", "sell_date", "buy_time", 
-        "sell_time", "buy_price", "sell_price", "profit", "data"]
+        options = ["text", "input", "first_date", "second_date", "lowest_price_date", "highest_price_date", "lowest_price", "highest_price", "data"]
 
         for option in options:
             match option:
@@ -333,23 +364,17 @@ class Application:
                             case "input":
                                 dictionary2[copy] = data[1]
                             case "first_date":
-                                dictionary2[copy] = data[2]
+                                dictionary2[copy] = self.convert_timestamp_to_date(data[2])
                             case "second_date":
-                                dictionary2[copy] = data[3]
-                            case "buy_date":
-                                dictionary2[copy] = data[4]
-                            case "sell_date":
-                                dictionary2[copy] = data[5]
-                            case "buy_time":
+                                dictionary2[copy] = self.convert_timestamp_to_date(data[3])
+                            case "highest_price_date":
+                                dictionary2[copy] = self.convert_timestamp_to_date(data[4])
+                            case "lowest_price_date":
+                                dictionary2[copy] = self.convert_timestamp_to_date(data[5])
+                            case "highest_price":
                                 dictionary2[copy] = data[6]
-                            case "sell_time":
+                            case "lowest_price":
                                 dictionary2[copy] = data[7]
-                            case "buy_price":
-                                dictionary2[copy] = data[8]
-                            case "sell_price":
-                                dictionary2[copy] = data[9]
-                            case "profit":
-                                dictionary2[copy] = data[10]
                     dictionary[option] = dictionary2
 
         return dictionary
@@ -406,13 +431,11 @@ class Application:
 
         return dictionary
     
-    # Edit this
     # Function that returns buy and sell date data in json form
     def buy_and_sell_dates_to_json_form(self, data):
         dictionary = {}
         dictionary2 = {}
-        options = ["text", "input", "first_date", "second_date", "buy_date", "sell_date", "buy_time", 
-        "sell_time", "buy_price", "sell_price", "profit", "data"]
+        options = ["text", "input", "first_date", "second_date", "buy_date", "sell_date", "buy_price", "sell_price", "profit", "data"]
 
         for option in options:
             match option:
@@ -431,16 +454,12 @@ class Application:
                                 dictionary2[copy] = data[4]
                             case "sell_date":
                                 dictionary2[copy] = data[5]
-                            case "buy_time":
-                                dictionary2[copy] = data[6]
-                            case "sell_time":
-                                dictionary2[copy] = data[7]
                             case "buy_price":
-                                dictionary2[copy] = data[8]
+                                dictionary2[copy] = data[6]
                             case "sell_price":
-                                dictionary2[copy] = data[9]
+                                dictionary2[copy] = data[7]
                             case "profit":
-                                dictionary2[copy] = data[10]
+                                dictionary2[copy] = data[8]
                     dictionary[option] = dictionary2
 
         return dictionary
@@ -449,18 +468,7 @@ if __name__ == "__main__":
     application = Application()
 
     #application.update_data("01-11-2021|02-11-2021")
-    application.update_data("25-11-2021|26-11-2021")
-    print("1.")
-    print(application.get_downward_trend())
-    print("2.")
-    print(application.get_highest_trading_volume())
-    print("3.")
-    print(application.get_best_days_to_buy_and_sell())
-
-    print("")
-
-    # Why doesn't this work
-    #application.update_data("24-11-2021|25-11-2021")
+    #application.update_data("25-11-2021|26-11-2021")
     #print("1.")
     #print(application.get_downward_trend())
     #print("2.")
@@ -468,12 +476,27 @@ if __name__ == "__main__":
     #print("3.")
     #print(application.get_best_days_to_buy_and_sell())
 
+    print("")
+
+    # Why doesn't this work
+    application.update_data("24-11-2021|25-11-2021")
+    #print("1.")
+    #print(application.get_downward_trend())
+    #print("2.")
+    #print(application.get_highest_trading_volume())
+    #print("3.")
+    print(application.get_best_days_to_buy_and_sell())
+
     #Funktions used in the application
     #----------------------------------------------------
     #print("A")
     #print(application.get_timestamps_from_dates("26-11-2021|28-11-2021"))
+    #print("B")
+    #print(application.correct_form_for_crypto("25-11-2021"))
     #print("C")
     #print(application.convert_timestamp_to_date(1257326176)) 
+    #print("D")
+    #print(application.converted_date_to_correct_form("2020-10-10"))
     #print("")
     #----------------------------------------------------
 
@@ -512,13 +535,13 @@ if __name__ == "__main__":
     #print("")
 
     #Don't buy test
-    #application.update_data("26-11-2021|30-11-2021")
+    #application.update_data("26-11-2021|27-11-2021")
     #print("don't buy")
     #print(application.get_best_days_to_buy_and_sell())
 
-    print("")
+    """print("")
 
-    """#Wrong input test
+    #Wrong input test
     application.update_data("25-11-2021|24-11-2021")
     print("Wrong input")
     print("1.")

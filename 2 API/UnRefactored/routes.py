@@ -32,7 +32,7 @@ def get_highest_trading_volume_with_url(dates):
 
 @app.route('/get/buy_and_sell_dates/<string:dates>/')
 def get_buy_and_sell_dates_with_url(dates):
-    return jsonify(application.get_buy_and_sell_dates(dates)), 200
+    return jsonify(application.get_best_days_to_buy_and_sell(dates)), 200
 
 # Json.dumps
 """@app.route('/get/downward_trend/<dates>/')

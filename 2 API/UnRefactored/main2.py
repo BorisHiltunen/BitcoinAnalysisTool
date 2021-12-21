@@ -72,9 +72,10 @@
 
 #Venv is needed for the module to work
 
-#How to get the data:
-from datetime import datetime, timezone
+#----------------------------------------------------------------------------- 79 character line
 from pycoingecko import CoinGeckoAPI
+from datetime import datetime, timezone
+
 cg = CoinGeckoAPI()
 
 #missions
@@ -94,17 +95,21 @@ class Application:
         self.sums = []
         self.amount = 0
         self.incorrect_input = False
-        self.count = 0
+
+#----------------------------------------------------------------------------- 79 character line
 
     # 1 Getting data
     # Function for getting data with start and finish dates
     def update_data(self, dates: str):
-        self.count += 1
 
+        self.data = []
+        self.buy_date_indices = []
+        self.sums = []
         prices = []
         total_volumes = []
+        self.amount = 0
         count = 0
-        self.data = []
+        self.incorrect_input = False
 
         date1 = self.get_timestamps_from_dates(dates)[0]
         date2 = self.get_timestamps_from_dates(dates)[1]
@@ -131,6 +136,8 @@ class Application:
             date1 += 3600
             count += 1
 
+#----------------------------------------------------------------------------- 79 character line
+
     # IMPORTANT THIS FUNCTION ADDS 2 HOURS FOR SOME REASON!
     # Function that changes string containing two dates into tuple that contains two timestamps
     def get_timestamps_from_dates(self, dates: str):
@@ -156,10 +163,14 @@ class Application:
 
         return utc_timestamp1, utc_timestamp2
 
+#----------------------------------------------------------------------------- 79 character line
+
     # Function that converts timestamp into a date
     def convert_timestamp_to_date(self, timestamp):
         date = datetime.fromtimestamp(timestamp)
         return date
+
+#----------------------------------------------------------------------------- 79 character line
 
     # Downward trend
     # Function that returns biggest downward trend from the given dates
@@ -196,9 +207,11 @@ class Application:
                 most = quantity
 
         text = (f"In bitcoin’s historical data from CoinGecko, the price decreased {most} days in a row" 
-        f" from {self.data[0][3][:10]} to {self.data[0][3][11:]}".replace("\u2019", "'"))
+                f" from {self.data[0][3][:10]} to {self.data[0][3][11:]}".replace("\u2019", "'"))
 
         return self.downward_trend_to_json_form(tuple((text, self.data[0][3], self.data[0][3][:10], self.data[0][3][11:], most)))
+
+#----------------------------------------------------------------------------- 79 character line
 
     # HighestTradingVolume
     # Function that returns HighestTradingVolume from the given dates
@@ -219,6 +232,8 @@ class Application:
 
         return self.highest_trading_volume_to_json_form(tuple((text, self.data[0][3], self.data[0][3][:10], 
         self.data[0][3][11:], str(self.convert_timestamp_to_date(highest[0]))[:10], highest[1])))
+
+#----------------------------------------------------------------------------- 79 character line
 
     # 2 getting price differences
     def get_price_differences(self):
@@ -250,15 +265,15 @@ class Application:
                     highest = "sell", self.data[count][0], self.data[count][1]
             count += 1
 
-        #Add dates, buyprice and sellprice
         if len(self.sums) == len(self.data):
             #return len(self.sums), self.sums, self.sums[2], self.convert_timestamp_to_date(self.sums[2][0][1]), self.convert_timestamp_to_date(self.sums[2][1][1])
-            #print(self.sums[0][0])
             return self.sums
         else:
             sum = highest[2]-lowest[2]
             self.sums.append((lowest, highest, sum))
             return self.get_price_differences()
+
+#----------------------------------------------------------------------------- 79 character line
 
     # 3 getting the best time to buy and sell
     # Function for getting the best days to buy and sell bitcoin
@@ -284,7 +299,6 @@ class Application:
             str(self.convert_timestamp_to_date(both[0][1]))[11:], str(self.convert_timestamp_to_date(both[1][1]))[11:], 
             int(both[0][2]), int(both[1][2]), both[2])))
         else:
-
             # Think about how to express this
             text = f"{self.convert_timestamp_to_date(both[0][1])}, {self.convert_timestamp_to_date(both[1][1])}"
 
@@ -292,6 +306,8 @@ class Application:
             self.data[0][3][11:], str(self.convert_timestamp_to_date(both[0][1]))[:10], str(self.convert_timestamp_to_date(both[1][1]))[:10], 
             str(self.convert_timestamp_to_date(both[0][1]))[11:], str(self.convert_timestamp_to_date(both[1][1]))[11:],
             int(both[0][2]), int(both[1][2]), both[2])))
+
+#----------------------------------------------------------------------------- 79 character line
 
     # Function that returns data from incorrect input in json form
     def incorrect_input_to_json_form(self, data):
@@ -315,6 +331,8 @@ class Application:
                     dictionary[option] = dictionary2
 
         return dictionary
+
+#----------------------------------------------------------------------------- 79 character line
 
     # Function that returns data in JSON form from input that didn't have a good time to buy bitcoin thus neither sell it
     def bad_time_to_buy_to_json_form(self, data):
@@ -354,6 +372,8 @@ class Application:
 
         return dictionary
 
+#----------------------------------------------------------------------------- 79 character line
+
     # Function that returns downward trend data in json form
     def downward_trend_to_json_form(self, data):
         dictionary = {}
@@ -378,6 +398,8 @@ class Application:
                     dictionary[option] = dictionary2
 
         return dictionary
+
+#----------------------------------------------------------------------------- 79 character line
 
     # Function that returns highest trading volume data in json form
     def highest_trading_volume_to_json_form(self, data):
@@ -406,7 +428,8 @@ class Application:
 
         return dictionary
     
-    # Edit this
+#----------------------------------------------------------------------------- 79 character line
+
     # Function that returns buy and sell date data in json form
     def buy_and_sell_dates_to_json_form(self, data):
         dictionary = {}
@@ -445,12 +468,13 @@ class Application:
 
         return dictionary
 
+#----------------------------------------------------------------------------- 79 character line
+
 if __name__ == "__main__":
     application = Application()
 
-    #application.update_data("01-11-2021|02-11-2021")
-    application.update_data("25-11-2021|26-11-2021")
-    print("1.")
+    application.update_data("26-11-2021|28-11-2021")
+    print("first 1.")
     print(application.get_downward_trend())
     print("2.")
     print(application.get_highest_trading_volume())
@@ -460,13 +484,15 @@ if __name__ == "__main__":
     print("")
 
     # Why doesn't this work
-    #application.update_data("24-11-2021|25-11-2021")
-    #print("1.")
-    #print(application.get_downward_trend())
-    #print("2.")
-    #print(application.get_highest_trading_volume())
-    #print("3.")
-    #print(application.get_best_days_to_buy_and_sell())
+    application.update_data("25-11-2021|26-11-2021")
+    print("second 1.")
+    print(application.get_downward_trend())
+    print("2.")
+    print(application.get_highest_trading_volume())
+    print("3.")
+    print(application.get_best_days_to_buy_and_sell())
+
+    print("")
 
     #Funktions used in the application
     #----------------------------------------------------

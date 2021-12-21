@@ -73,8 +73,9 @@
 #Venv is needed for the module to work
 
 #----------------------------------------------------------------------------- 79 character line
-from datetime import datetime, timezone
 from pycoingecko import CoinGeckoAPI
+from datetime import datetime, timezone
+
 cg = CoinGeckoAPI()
 
 #missions
@@ -206,7 +207,7 @@ class Application:
                 most = quantity
 
         text = (f"In bitcoin’s historical data from CoinGecko, the price decreased {most} days in a row" 
-        f" from {self.data[0][3][:10]} to {self.data[0][3][11:]}".replace("\u2019", "'"))
+                f" from {self.data[0][3][:10]} to {self.data[0][3][11:]}".replace("\u2019", "'"))
 
         return self.downward_trend_to_json_form(tuple((text, self.data[0][3], self.data[0][3][:10], self.data[0][3][11:], most)))
 

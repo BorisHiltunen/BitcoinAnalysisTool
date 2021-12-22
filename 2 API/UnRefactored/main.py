@@ -15,8 +15,7 @@ class Application:
 
 #----------------------------------------------------------------------------- 79 character line
 
-    # 1 Getting data
-    # Function for getting data with start and finish dates
+    # Function for getting data hourly with start and finish dates
     def update_data(self, dates: str):
 
         self.data = []
@@ -26,6 +25,8 @@ class Application:
         total_volumes = []
         self.amount = 0
         count = 0
+        reducer = 0
+
         self.incorrect_input = False
 
         date1 = self.get_timestamps_from_dates(dates)[0]
@@ -40,6 +41,7 @@ class Application:
 
         if date2 != now.strftime("%d-%b-%Y (%H:%M:%S.%f)"):
             date2 += 3600
+            reducer += 3600
 
         data = cg.get_coin_market_chart_range_by_id(id='bitcoin', vs_currency='eur', from_timestamp=date1, to_timestamp=date2)
 
@@ -48,14 +50,12 @@ class Application:
         for price in data["total_volumes"]:
             total_volumes.append(price[1])
 
-        # here is something wrong
-        # date2-date1 isn't 86400 when we are looking at 1 day difference?
-        if date2-date1 == 86400:
-            while count < len(prices):
-                self.data.append(tuple((date1, prices[count], total_volumes[count], dates)))
-                date1 += 300
-                count += 1
-        elif date2-date1 < 7862400:
+        #if (date2-reducer)-date1 == 86400:
+        #    while count < len(prices):
+        #        self.data.append(tuple((date1, prices[count], total_volumes[count], dates)))
+        #        date1 += 300
+        #        count += 1
+        if (date2-reducer)-date1 < 7862400:
             while count < len(prices):
                 self.data.append(tuple((date1, prices[count], total_volumes[count], dates)))
                 date1 += 3600
@@ -66,9 +66,67 @@ class Application:
                 date1 += 86400
                 count += 1
 
+        #print(len(self.data))
+
 #----------------------------------------------------------------------------- 79 character line
 
-    # IMPORTANT THIS FUNCTION ADDS 2 HOURS FOR SOME REASON!
+    # Function for getting data by day with start and finish dates
+    def update_data_by_day(self, dates: str):
+
+        self.data = []
+        self.buy_date_indices = []
+        self.sums = []
+        prices = []
+        total_volumes = []
+        self.amount = 0
+        count = 0
+        reducer = 0
+        seconds = 0
+
+        self.incorrect_input = False
+
+        date1 = self.get_timestamps_from_dates(dates)[0]
+        date2 = self.get_timestamps_from_dates(dates)[1]
+
+        if date1 > date2:
+            self.incorrect_input = True
+            self.data.append(dates)
+            return 
+
+        now = datetime.now()
+
+        if date2 != now.strftime("%d-%b-%Y (%H:%M:%S.%f)"):
+            date2 += 3600
+            reducer += 3600
+
+        data = cg.get_coin_market_chart_range_by_id(id='bitcoin', vs_currency='eur', from_timestamp=date1, to_timestamp=date2)
+
+        for price in data["prices"]:
+            prices.append(price[1])
+        for price in data["total_volumes"]:
+            total_volumes.append(price[1])
+
+        if (date2-reducer)-date1 < 7862400:
+            while count < len(prices):
+                if seconds == 86400:
+                    self.data.append(tuple((date1, prices[count], total_volumes[count], dates)))
+                    date1 += 86400
+                    seconds = 0
+                count += 1
+                seconds += 3600
+        else:
+            while count < len(prices):
+                seconds += 3600
+                if seconds == 86400:
+                    self.data.append(tuple((date1, prices[count], total_volumes[count], dates)))
+                    date1 += 86400
+                    seconds = 0
+                count += 1
+
+        #print(len(self.data))
+
+#----------------------------------------------------------------------------- 79 character line
+
     # Function that changes string containing two dates into tuple that contains two timestamps
     def get_timestamps_from_dates(self, dates: str):
         year1 = f"{dates[6]}{dates[7]}{dates[8]}{dates[9]}"
@@ -102,14 +160,15 @@ class Application:
 
 #----------------------------------------------------------------------------- 79 character line
 
-    # Downward trend
     # Function that returns biggest downward trend from the given dates
     def get_downward_trend(self):
 
         chosen_prices = []
         chosen_price_quantities = []
         count = 0
-        most = 0
+        most = (0, 0, 0)
+        downward_trend_start_timestamp = 0
+        downward_trend_end_timestamp = 0
 
         if self.incorrect_input:
             text = "Incorrect input"
@@ -118,32 +177,50 @@ class Application:
         while count < len(self.data):
             if count == len(self.data)-1:
                 if self.data[count-1][1] > self.data[count][1]:
-                    chosen_prices.append(self.data[count][1])
+                    if downward_trend_start_timestamp == 0:
+                        downward_trend_start_timestamp = self.data[count][0]
+                    if self.data[count][1] not in chosen_prices:
+                        chosen_prices.append(self.data[count][1])
+                        chosen_price_quantities.append((downward_trend_start_timestamp, downward_trend_end_timestamp, len(chosen_prices)))
+                        chosen_prices = []
+                        downward_trend_end_timestamp = 0
                 else:
-                    chosen_price_quantities.append(len(chosen_prices))
+                    if downward_trend_end_timestamp == 0:
+                        downward_trend_end_timestamp = self.data[count][0]
+                    chosen_price_quantities.append((downward_trend_start_timestamp, downward_trend_end_timestamp, len(chosen_prices)))
+                    downward_trend_start_timestamp = 0
                     chosen_prices = []
             else:
                 if self.data[count][1] > self.data[count+1][1]:
+                    if downward_trend_start_timestamp == 0:
+                        downward_trend_start_timestamp = self.data[count][0]
                     if self.data[count][1] not in chosen_prices:
                         chosen_prices.append(self.data[count][1])
                     chosen_prices.append(self.data[count+1][1])
+                    downward_trend_end_timestamp = 0
                 else:
-                    chosen_price_quantities.append(len(chosen_prices))
+                    if downward_trend_end_timestamp == 0:
+                        downward_trend_end_timestamp = self.data[count][0]
+                    chosen_price_quantities.append((downward_trend_start_timestamp, downward_trend_end_timestamp, len(chosen_prices)))
+                    downward_trend_start_timestamp = 0
                     chosen_prices = []
             count += 1
 
         for quantity in chosen_price_quantities:
-            if quantity > most:
+            #if self.data lenght is 1 quantity[2] is the same as most[2]
+            # therefore most isn't quantity and timedates are 0
+            # and dates 1960...
+            if quantity[2] > most[2]:
                 most = quantity
 
-        text = (f"In bitcoin’s historical data from CoinGecko, the price decreased {most} days in a row" 
+        text = (f"In bitcoin’s historical data from CoinGecko, the price decreased {most[2]} days in a row" 
                 f" from {self.data[0][3][:10]} to {self.data[0][3][11:]}".replace("\u2019", "'"))
 
-        return self.downward_trend_to_json_form(tuple((text, self.data[0][3], self.data[0][3][:10], self.data[0][3][11:], most)))
+        return self.downward_trend_to_json_form(tuple((text, self.data[0][3], self.data[0][3][:10], self.data[0][3][11:], 
+        str(self.convert_timestamp_to_date(most[0])), str(self.convert_timestamp_to_date(most[1])), most[2])))
 
 #----------------------------------------------------------------------------- 79 character line
 
-    # HighestTradingVolume
     # Function that returns HighestTradingVolume from the given dates
     def get_highest_trading_volume(self):
 
@@ -161,11 +238,11 @@ class Application:
         text = f"{str(self.convert_timestamp_to_date(highest[0]))[:10]}, {highest[1]}"
 
         return self.highest_trading_volume_to_json_form(tuple((text, self.data[0][3], self.data[0][3][:10], 
-        self.data[0][3][11:], str(self.convert_timestamp_to_date(highest[0]))[:10], highest[1])))
+        self.data[0][3][11:], str(self.convert_timestamp_to_date(highest[0]))[:10], str(self.convert_timestamp_to_date(highest[0]))[11:], highest[1])))
 
 #----------------------------------------------------------------------------- 79 character line
 
-    # 2 getting price differences
+    # Function that returns price differences
     def get_price_differences(self):
 
         count = 0
@@ -205,7 +282,6 @@ class Application:
 
 #----------------------------------------------------------------------------- 79 character line
 
-    # 3 getting the best time to buy and sell
     # Function for getting the best days to buy and sell bitcoin
     def get_best_days_to_buy_and_sell(self):
 
@@ -308,7 +384,7 @@ class Application:
     def downward_trend_to_json_form(self, data):
         dictionary = {}
         dictionary2 = {}
-        options = ["text", "input", "first_date", "second_date", "days", "data"]
+        options = ["text", "input", "first_date", "second_date", "downward_trend_start_date", "downward_trend_end_date", "days", "data"]
 
         for option in options:
             match option:
@@ -323,8 +399,12 @@ class Application:
                                 dictionary2[copy] = data[2]
                             case "second_date":
                                 dictionary2[copy] = data[3]
+                            case "downward_trend_start_date":
+                                dictionary2[copy] = data[4]
+                            case "downward_trend_end_date":
+                                dictionary2[copy] = data[5]
                             case "days":
-                                dictionary2[copy] = f"{data[4]} days"
+                                dictionary2[copy] = data[6]
                     dictionary[option] = dictionary2
 
         return dictionary
@@ -335,7 +415,7 @@ class Application:
     def highest_trading_volume_to_json_form(self, data):
         dictionary = {}
         dictionary2 = {}
-        options = ["text", "input", "first_date", "second_date", "highest_trading_volume_date", "highest_trading_volume", "data"]
+        options = ["text", "input", "first_date", "second_date", "highest_trading_volume_date", "highest_trading_volume_time", "highest_trading_volume", "data"]
         
         for option in options:
             match option:
@@ -352,8 +432,10 @@ class Application:
                                 dictionary2[copy] = data[3]
                             case "highest_trading_volume_date":
                                 dictionary2[copy] = data[4]
-                            case "highest_trading_volume":
+                            case "highest_trading_volume_time":
                                 dictionary2[copy] = data[5]
+                            case "highest_trading_volume":
+                                dictionary2[copy] = data[6]
                     dictionary[option] = dictionary2
 
         return dictionary
@@ -403,7 +485,8 @@ class Application:
 if __name__ == "__main__":
     application = Application()
 
-    application.update_data("26-11-2020|27-11-2021")
+    #application.update_data("26-11-2020|27-11-2021")
+    application.update_data_by_day("26-11-2020|27-11-2021")
     print("first 1.")
     print(application.get_downward_trend())
     print("2.")
@@ -413,7 +496,8 @@ if __name__ == "__main__":
 
     print("")
 
-    application.update_data("25-11-2021|26-11-2021")
+    #application.update_data("25-11-2021|26-11-2021")
+    application.update_data_by_day("25-11-2021|26-11-2021")
     print("second 1.")
     print(application.get_downward_trend())
     print("2.")
@@ -423,8 +507,9 @@ if __name__ == "__main__":
 
     print("")
 
-    application.update_data("01-11-2021|26-11-2021")
-    print("second 1.")
+    #application.update_data("01-11-2021|26-11-2021")
+    application.update_data_by_day("01-11-2021|26-11-2021")
+    print("third 1.")
     print(application.get_downward_trend())
     print("2.")
     print(application.get_highest_trading_volume())

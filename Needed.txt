@@ -1,1 +1,1 @@
-pycoingecko, flask, pep8, pylintvirtual environment
+pycoingecko, flask, pep8, pylint, virtual environment

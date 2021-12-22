@@ -111,7 +111,7 @@ class Application:
         count = 0
         most = 0
 
-        if self.incorrect_input == True:
+        if self.incorrect_input:
             text = "Incorrect input"
             return self.incorrect_input_to_json_form(tuple((text, self.data)))
 
@@ -147,7 +147,7 @@ class Application:
     # Function that returns HighestTradingVolume from the given dates
     def get_highest_trading_volume(self):
 
-        if self.incorrect_input == True:
+        if self.incorrect_input:
             text = "Incorrect input"
             return self.incorrect_input_to_json_form(tuple((text, self.data)))
 
@@ -209,7 +209,7 @@ class Application:
     # Function for getting the best days to buy and sell bitcoin
     def get_best_days_to_buy_and_sell(self):
 
-        if self.incorrect_input == True:
+        if self.incorrect_input:
             text = "Incorrect input"
 
             return self.incorrect_input_to_json_form(tuple((text, self.data)))

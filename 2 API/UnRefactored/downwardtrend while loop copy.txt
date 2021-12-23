@@ -1,0 +1,35 @@
+        while count < len(self.data):
+            if count == len(self.data)-1:
+                print("here")
+                if self.data[count-1][1] > self.data[count][1]:
+                    print("this one")
+                    if downward_trend_start_timestamp == 0:
+                        downward_trend_start_timestamp = self.data[count][0]
+                    if downward_trend_end_timestamp == 0:
+                        downward_trend_end_timestamp = self.data[count-1][0]
+                    if self.data[count][1] not in chosen_prices:
+                        chosen_prices.append(self.data[count][1])
+                        chosen_price_quantities.append((downward_trend_start_timestamp, downward_trend_end_timestamp, len(chosen_prices)))
+                        chosen_prices = []
+                        downward_trend_end_timestamp = 0
+                else:
+                    if downward_trend_end_timestamp == 0:
+                        downward_trend_end_timestamp = self.data[count][0]
+                    chosen_price_quantities.append((downward_trend_start_timestamp, downward_trend_end_timestamp, len(chosen_prices)))
+                    downward_trend_start_timestamp = 0
+                    chosen_prices = []
+            else:
+                if self.data[count][1] > self.data[count+1][1]:
+                    if downward_trend_start_timestamp == 0:
+                        downward_trend_start_timestamp = self.data[count][0]
+                    if self.data[count][1] not in chosen_prices:
+                        chosen_prices.append(self.data[count][1])
+                    chosen_prices.append(self.data[count+1][1])
+                    downward_trend_end_timestamp = 0
+                else:
+                    if downward_trend_end_timestamp == 0:
+                        downward_trend_end_timestamp = self.data[count][0]
+                    chosen_price_quantities.append((downward_trend_start_timestamp, downward_trend_end_timestamp, len(chosen_prices)))
+                    downward_trend_start_timestamp = 0
+                    chosen_prices = []
+            count += 1

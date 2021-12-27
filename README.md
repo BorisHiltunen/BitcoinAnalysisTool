@@ -9,10 +9,10 @@ Boris Hiltunen ([BorisHiltunen](https://github.com/BorisHiltunen))
 ## Tools and Libraries
 - [Flask](https://flask.palletsprojects.com/en/2.0.x/)
 - [JSON](https://www.json.org/json-en.html)
-- You can find required packets from Requirements.txt
+- You can find required packets from requirements.txt
 
 ## Setup
-- pip install -r Requirements.txt
+- pip install -r requirements.txt
 
 ## Api endpoints:
 
@@ -20,7 +20,7 @@ Boris Hiltunen ([BorisHiltunen](https://github.com/BorisHiltunen))
 localhost:5000/
 ```
 <b>GET</b>
-  - **/get**
+  - **/get/**
     ```python 
     Returns options
     ```
@@ -40,12 +40,14 @@ localhost:5000/
     
     ```python 
         {
-            "text": "In bitcoin's historical data from CoinGecko, the price decreased 7 days in a row for the inputs from 2021-11-25 02:00:00 and to 2021-11-30 03:00:00",
+            "text": "In bitcoin's historical data from CoinGecko, the price decreased 3 days in a row from 2021-11-25 to 2021-11-27",
             "data": {
                 "input": "25-11-2021|30-11-2021",
-                "first_date": 1637798400.0,
-                "second_date": 1638230400.0,
-                "days": "7 days"
+                "first_date": "25-11-2021",
+                "second_date": "30-11-2021",
+                "downward_trend_start_date": "2021-11-25",
+                "downward_trend_end_date": "2021-11-27",
+                "days": 3
             }
         }
     ```
@@ -60,13 +62,14 @@ localhost:5000/
     
     ```python 
         {
-            "text": "2021-11-30 02:00:00:27436802911.974957",
+            "text": "Highest trading volume date: 15:00:00, Highest trading volume: 37420994605.317085",
             "data": {
                 "input": "25-11-2021|30-11-2021",
-                "first_date": "2021-11-25 02:00:00",
-                "second_date": "2021-11-30 02:00:00",
-                "highest_trading_volume_date": "2021-11-30 02:00:00",
-                "highest_trading_volume": 27436802911.974957
+                "first_date": "25-11-2021",
+                "second_date": "30-11-2021",
+                "highest_trading_volume_date": "2021-11-26",
+                "highest_trading_volume_time": "15:00:00",
+                "highest_trading_volume": 37420994605.317085
             }
         }
     ```
@@ -81,15 +84,18 @@ localhost:5000/
     
     ```python 
         {
-            "text": "2021-11-27 02:00:00, 2021-11-29 21:00:00",
+            "text": "Buy date: 2021-11-27, Sell date: 2021-11-29",
             "data": {
                 "input": "25-11-2021|30-11-2021",
-                "first_date": "2021-11-25 02:00:00",
-                "second_date": "2021-11-30 02:00:00",
-                "buy_date": "2021-11-27 02:00:00",
-                "sell_date": "2021-11-29 21:00:00",
+                "first_date": "25-11-2021",
+                "second_date": "30-11-2021",
+                "buy_date": "2021-11-27",
+                "sell_date": "2021-11-29",
+                "buy_time": "00:00:00",
+                "sell_time": "19:00:00",
                 "buy_price": 47551,
-                "sell_price": 52161
+                "sell_price": 52161,
+                "profit": 4610.8124336957335
             }
         }
     ```

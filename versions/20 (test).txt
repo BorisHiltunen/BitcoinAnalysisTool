@@ -54,22 +54,23 @@ class Application:
                                                     to_timestamp=date2)
 
         for price in data["prices"]:
-            prices.append(price[1])
+            prices.append(price)
         for volume in data["total_volumes"]:
-            total_volumes.append(volume[1])
+            total_volumes.append(volume)
+
+        print(self.get_date_from_timestamp(int(prices[0][0])))
 
         if (date2-reducer)-date1 <= 86400:
             self.one_day = True
             while count < len(prices):
                 self.data.append(
                     tuple((
-                        date1,
-                        prices[count],
-                        total_volumes[count],
+                        prices[count][0],
+                        prices[count][1],
+                        total_volumes[count][1],
                         dates
                     ))
                 )
-                date1 += 3600
                 count += 1
 
         elif (date2-reducer)-date1 <= 7862400:
@@ -77,26 +78,24 @@ class Application:
             while count < len(prices):
                 self.data.append(
                     tuple((
-                        date1,
-                        prices[count],
-                        total_volumes[count],
+                        prices[count][0],
+                        prices[count][1],
+                        total_volumes[count][1],
                         dates
                     ))
                 )
-                date1 += 3600
                 count += 1
         else:
             self.over_90_days = True
             while count < len(prices):
                 self.data.append(
                     tuple((
-                        date1,
-                        prices[count],
-                        total_volumes[count],
+                        prices[count][0],
+                        prices[count][1],
+                        total_volumes[count][1],
                         dates
                     ))
                 )
-                date1 += 86400
                 count += 1
 
     def get_timestamps_from_input(self, dates: str):
@@ -310,12 +309,10 @@ class Application:
             if quantity[2] > most[2]:
                 most = quantity
 
-        text = (
-                f"In bitcoin’s historical data from CoinGecko, "
+        text = (f"In bitcoin’s historical data from CoinGecko, "
                 f"the price decreased {most[2]} days in a row "
-                f"from {self.get_date_from_timestamp(most[0])[:10]} "
-                f"to {self.get_date_from_timestamp(most[1])[:10]}"
-                ).replace("\u2019", "'")
+                f"from {str(self.get_date_from_timestamp(most[0]))[:10]} "
+                f"to {str(self.get_date_from_timestamp(most[1]))[:10]}")
 
         return self.downward_trend_to_json_form(
             tuple((
@@ -348,7 +345,7 @@ class Application:
                 highest = (volume[0], volume[2])
 
         text = (f"Highest trading volume date: "
-                f"{self.get_date_from_timestamp(highest[0])[11:]}, "
+                f"{str(self.get_date_from_timestamp(highest[0]))[11:]}, "
                 f"Highest trading volume: {highest[1]}")
 
         return self.highest_trading_volume_to_json_form(
@@ -516,9 +513,9 @@ class Application:
             )
         else:
             text = (f"Buy date: "
-                    f"{self.get_date_from_timestamp(both[0][1])[:10]}, "
+                    f"{str(self.get_date_from_timestamp(both[0][1]))[:10]}, "
                     f"Sell date: "
-                    f"{self.get_date_from_timestamp(both[1][1])[:10]}")
+                    f"{str(self.get_date_from_timestamp(both[1][1]))[:10]}")
 
             return self.buy_and_sell_dates_to_json_form(
                 tuple((
@@ -825,10 +822,10 @@ class Application:
 if __name__ == "__main__":
     application = Application()
 
-    application.update_data("25-11-2021|30-11-2021")
+    #application.update_data("25-11-2021|30-11-2021")
     #application.update_data("26-11-2021|27-11-2021")
     #application.update_data("01-11-2021|27-11-2021")
-    #application.update_data("26-11-2020|27-11-2021")
+    application.update_data("26-11-2020|27-11-2021")
 
     #This doesn't work yet
     #application.update_data("01-01-2018|27-11-2021")

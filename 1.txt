@@ -1,0 +1,27 @@
+        while count < len(self.get_highest_prices()):
+            if self.data[count][0] - start == 0:
+                if count == len(self.data)-1:
+                    if end_timestamp == 0:
+                        end_timestamp = self.data[count][0]
+                    chosen_price_quantities.append((start_timestamp,
+                                                    end_timestamp,
+                                                    len(chosen_prices)))
+                    start_timestamp = 0
+                    chosen_prices = []
+                else:
+                    if (self.get_highest_price_of_the_day(self.data[count][0]) > self.get_highest_price_of_the_day(self.data[count+1][0])):
+                        if start_timestamp == 0:
+                            start_timestamp = self.data[count][0]
+                        if self.get_highest_price_of_the_day(self.data[count][0]) not in chosen_prices:
+                            chosen_prices.append(self.get_highest_price_of_the_day(self.data[count][0]))
+                        chosen_prices.append(self.get_highest_price_of_the_day(self.data[count+1][0]))
+                        end_timestamp = 0
+                    else:
+                        if end_timestamp == 0:
+                            end_timestamp = self.data[count][0]
+                        chosen_price_quantities.append((start_timestamp,
+                                                        end_timestamp,
+                                                        len(chosen_prices)))
+                        start_timestamp = 0
+                        chosen_prices = []
+            count += 1

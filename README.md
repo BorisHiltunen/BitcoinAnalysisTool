@@ -1,7 +1,7 @@
 # Vincit
 
 ## Description
-VincitApplication is a Flask project made with Python. The application returns wanted data in JSON form depending on the given input written in the URL (dates separated by the pipe symbol "|"). 
+Vincit Application is a Flask project made with Python. The application returns wanted data in JSON form depending on the given input written in the URL (dates separated by the pipe symbol "|"). 
 
 ## Authors
 Boris Hiltunen ([BorisHiltunen](https://github.com/BorisHiltunen))

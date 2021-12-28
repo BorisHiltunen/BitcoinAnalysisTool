@@ -1,4 +1,4 @@
-"""main.py: Contains the whole application except Flask side of the project."""
+#information about the code here
 
 from datetime import datetime, timezone
 from pycoingecko import CoinGeckoAPI
@@ -7,14 +7,11 @@ cg = CoinGeckoAPI()
 
 
 class Application:
-    """
-    Class that contains the whole application
-    except Flask side of the project.
-    """
     def __init__(self):
         self.data = []
         self.buy_date_indices = []
         self.sums = []
+        self.amount = 0
         self.incorrect_input = False
         self.one_day = False
         self.under_90_days = False
@@ -28,6 +25,7 @@ class Application:
         self.sums = []
         prices = []
         total_volumes = []
+        self.amount = 0
         count = 0
         reducer = 0
 
@@ -155,6 +153,30 @@ class Application:
             '%Y-%m-%d %H:%M:%S')
         return date
 
+    def get_highest_price_of_the_day(self, timestamp):
+        """Helper function that returns the highest price of the day"""
+
+        highest = 0.0
+
+        for price in self.data:
+            if price[0] - timestamp == 86400:
+                return highest
+            else:
+                if price[1] > highest:
+                    highest = price[1]
+
+    def get_lowest_price_of_the_day(self, timestamp):
+        """Helper function that returns the lowest price of the day"""
+
+        lowest = 1000000000.0
+
+        for price in self.data:
+            if price[0] - timestamp == 86400:
+                return lowest
+            else:
+                if price[1] < lowest:
+                    lowest = price[1]
+
     def get_highest_prices(self, timestamp):
         """Helper function that returns the highest prices as a list"""
 
@@ -171,6 +193,22 @@ class Application:
                 if price[1] > highest[1]:
                     highest = (price[0], price[1])
             count += 1
+
+        return prices
+
+    def get_lowest_prices(self, timestamp):
+        """Helper function that returns the lowest prices as a list"""
+
+        lowest = 1000000000.0
+        prices = []
+
+        for price in self.data:
+            if price[0] - timestamp == 86400:
+                prices.append(lowest)
+                lowest = 1000000000.0
+            else:
+                if price[1] < lowest:
+                    lowest = price[1]
 
         return prices
 

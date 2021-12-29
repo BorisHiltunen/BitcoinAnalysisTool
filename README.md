@@ -9,10 +9,50 @@ Boris Hiltunen ([BorisHiltunen](https://github.com/BorisHiltunen))
 ## Tools and Libraries
 - [Flask](https://flask.palletsprojects.com/en/2.0.x/)
 - [JSON](https://www.json.org/json-en.html)
+- [Datetime](https://docs.python.org/3/library/datetime.html)
 - You can find required packets from requirements.txt
 
 ## Setup
-- pip install -r requirements.txt
+- Clone or fork the repository.
+
+- Make an Virtual Environment
+-> (virtualenv env)
+
+- Access it
+-> (.\env\Scripts\activate)
+
+- Install requirements.txt
+-> (pip install -r requirements.txt)
+
+- Run
+-> (python runner.py)
+
+## Application's structure
+```GAP
+- ├── app
+- |   ├── helpers
+- |   |   ├── __init__.py
+- |   |   ├── timestamp_engine.py
+- |   ├── json_formatters
+- |   |   ├── __init__.py
+- |   |   ├── buy_and_sell_dates_json_formatter.py
+- |   |   ├── downward_trend_json_formatter.py
+- |   |   ├── incorrect_input_json_formatter.py
+- |   |   ├── trading_volume_json_formatter.py
+- |   ├── __init__.py
+- |   ├── buy_and_sell_dates.py
+- |   ├── data_bank.py
+- |   ├── data_updater.py
+- |   ├── downward_trend.py
+- |   ├── highest_trading_volume.py
+- |   ├── price_iterator.py
+- |   ├── sum_difference_iterator.py
+- ├── env
+- ├── .qitignore
+- ├── README.md
+- ├── requirements
+- ├── runner.py
+```
 
 ## Api endpoints:
 

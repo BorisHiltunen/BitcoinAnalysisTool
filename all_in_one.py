@@ -39,17 +39,16 @@ class Application:
         date1 = self.get_timestamps_from_input(dates)[0]
         date2 = self.get_timestamps_from_input(dates)[1]
 
-        print(self.get_date_from_timestamp(date1))
-        print(self.get_date_from_timestamp(date2))
-
-        if date1 > date2:
+        if date1 >= date2 or date1 < 1364428800.0:
             self.incorrect_input = True
             self.data.append(dates)
             return
 
-        now = datetime.now()
+        now = datetime.now(timezone.utc)
+        now_time = now.replace(tzinfo=timezone.utc)
+        now_timestamp = now_time.timestamp()
 
-        if date2 != now.strftime("%d-%b-%Y (%H:%M:%S.%f)"):
+        if date2 != now_timestamp:
             date2 += 3600
             reducer += 3600
 
@@ -63,36 +62,9 @@ class Application:
         for volume in data["total_volumes"]:
             total_volumes.append(volume[1])
 
-        if (date2-reducer)-date1 <= 86400:
-            self.one_day = True
-            while count < len(prices):
-                self.data.append(
-                    tuple((
-                        date1,
-                        prices[count],
-                        total_volumes[count],
-                        dates
-                    ))
-                )
-                date1 += 3600
-                count += 1
-
-        elif (date2-reducer)-date1 <= 7862400:
-            self.under_90_days = True
-            while count < len(prices):
-                self.data.append(
-                    tuple((
-                        date1,
-                        prices[count],
-                        total_volumes[count],
-                        dates
-                    ))
-                )
-                date1 += 3600
-                count += 1
-        else:
+        if now_timestamp-date2 > 113666279.31145096:
             self.over_90_days = True
-            while count < len(prices):
+            while count < len(total_volumes):
                 self.data.append(
                     tuple((
                         date1,
@@ -103,6 +75,47 @@ class Application:
                 )
                 date1 += 86400
                 count += 1
+        else:
+            if (date2-reducer)-date1 <= 86400:
+                self.one_day = True
+                while count < len(total_volumes):
+                    self.data.append(
+                        tuple((
+                            date1,
+                            prices[count],
+                            total_volumes[count],
+                            dates
+                        ))
+                    )
+                    date1 += 3600
+                    count += 1
+
+            elif (date2-reducer)-date1 <= 7862400:
+                self.under_90_days = True
+                while count < len(total_volumes):
+                    self.data.append(
+                        tuple((
+                            date1,
+                            prices[count],
+                            total_volumes[count],
+                            dates
+                        ))
+                    )
+                    date1 += 3600
+                    count += 1
+            else:
+                self.over_90_days = True
+                while count < len(total_volumes):
+                    self.data.append(
+                        tuple((
+                            date1,
+                            prices[count],
+                            total_volumes[count],
+                            dates
+                        ))
+                    )
+                    date1 += 86400
+                    count += 1
 
     def get_timestamps_from_input(self, dates: str):
         """Helper function that returns tuple containing two timestamps."""
@@ -297,7 +310,7 @@ class Application:
     def get_highest_trading_volume(self):
         """Function that returns HighestTradingVolume from the given dates."""
 
-        highest = ("", 0.0)
+        highest = ("", -1000000000)
 
         if self.incorrect_input:
             text = "Incorrect input"
@@ -339,11 +352,12 @@ class Application:
 
         while count < len(self.data):
             lowest = ("buy", self.data[0][0], 1000000000, 0)
-            if count in self.buy_date_indices:
-                count += 1
-                continue
-            else:
-                while index < len(self.data):
+
+            while index < len(self.data):
+                if index in self.buy_date_indices:
+                    index += 1
+                    continue
+                else:
                     if self.data[index][1] < lowest[2]:
                         lowest = (
                             "buy",
@@ -351,23 +365,25 @@ class Application:
                             self.data[index][1],
                             index
                             )
-                    index += 1
+                index += 1
 
-                index = 0
-                highest = ("sell", lowest[1], 0)
+            index = 0
+            highest = ("sell", lowest[1], -1000000000)
 
-                while index < len(self.data):
-                    if index < lowest[3]:
-                        index += 1
-                        continue
-                    else:
-                        if self.data[index][1] > highest[2]:
-                            highest = (
-                                "sell",
-                                self.data[index][0],
-                                self.data[index][1]
-                                )
+            while index < len(self.data):
+                if index < lowest[3]:
                     index += 1
+                    continue
+                else:
+                    if self.data[index][1] > highest[2]:
+                        highest = (
+                            "sell",
+                            self.data[index][0],
+                            self.data[index][1]
+                            )
+                index += 1
+            self.buy_date_indices.append(count)
+            index = 0
             count += 1
             total = highest[2]-lowest[2]
             self.sums.append((lowest, highest, total))
@@ -380,7 +396,7 @@ class Application:
         both = (
             ('buy', 1637971200.0, 1000000000.0, 24),
             ('sell', 1637971200.0, 0.0),
-            0.0
+            -1000000000.0
             )
 
         if self.incorrect_input:
@@ -416,7 +432,17 @@ class Application:
                 ))
             )
 
-        if both[2] <= 0:
+        if both[0][1] == 1637971200.0:
+            text = "Something went wrong"
+
+            return self.incorrect_input_to_json_form(
+                tuple((
+                    text,
+                    [self.data[0][3]]
+                ))
+            )
+
+        elif both[2] <= 0:
             text = "Don't buy"
 
             return self.buy_and_sell_dates_to_json_form(
@@ -745,13 +771,13 @@ class Application:
 if __name__ == "__main__":
     application = Application()
 
-    application.update_data("13-03-2021|13-04-2021")
+    #application.update_data("28-04-2013|28-04-2013")
     #application.update_data("26-11-2021|27-11-2021")
     #application.update_data("01-11-2021|27-11-2021")
     #application.update_data("26-11-2020|27-11-2021")
-
-    #This doesn't work yet
-    #application.update_data("01-01-2018|27-11-2021")
+    #application.update_data("28-04-2013|29-12-2021")
+    # Wrong input test
+    # application.update_data("25-11-2021|24-11-2021")
 
     print("1.")
     print(application.get_downward_trend())
@@ -762,22 +788,7 @@ if __name__ == "__main__":
 
     print("")
 
-    # Don't buy test
-    # application.update_data("26-11-2021|30-11-2021")
-    # print("don't buy")
-    # print(application.get_best_days_to_buy_and_sell())
-
     # print("")
-
-    # Wrong input test
-    # application.update_data("25-11-2021|24-11-2021")
-    # print("Wrong input")
-    # print("1.")
-    # print(application.get_downward_trend())
-    # print("2.")
-    # print(application.get_highest_trading_volume())
-    # print("3.")
-    # print(application.get_best_days_to_buy_and_sell())
 
     # Funktions used in the application
     # ----------------------------------------------------

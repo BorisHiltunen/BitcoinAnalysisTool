@@ -1,6 +1,6 @@
 """data_updater.py: Contains function that updates application's data."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from app.helpers import timestamp_engine
 from app import data_bank
 
@@ -26,14 +26,16 @@ def update_data(dates: str):
     date1 = timeform.get_timestamps_from_input(dates)[0]
     date2 = timeform.get_timestamps_from_input(dates)[1]
 
-    if date1 > date2:
+    if date1 >= date2 or date1 < 1364428800.0:
         data_bank.incorrect_input = True
         data_bank.data.append(dates)
         return
 
-    now = datetime.now()
+    now = datetime.now(timezone.utc)
+    now_time = now.replace(tzinfo=timezone.utc)
+    now_timestamp = now_time.timestamp()
 
-    if date2 != now.strftime("%d-%b-%Y (%H:%M:%S.%f)"):
+    if date2 != now_timestamp:
         date2 += 3600
         reducer += 3600
 
@@ -49,36 +51,9 @@ def update_data(dates: str):
     for volume in data["total_volumes"]:
         total_volumes.append(volume[1])
 
-    if (date2-reducer)-date1 <= 86400:
-        data_bank.one_day = True
-        while count < len(prices):
-            data_bank.data.append(
-                tuple((
-                    date1,
-                    prices[count],
-                    total_volumes[count],
-                    dates
-                ))
-            )
-            date1 += 3600
-            count += 1
-
-    elif (date2-reducer)-date1 <= 7862400:
-        data_bank.under_90_days = True
-        while count < len(prices):
-            data_bank.data.append(
-                tuple((
-                    date1,
-                    prices[count],
-                    total_volumes[count],
-                    dates
-                ))
-            )
-            date1 += 3600
-            count += 1
-    else:
+    if now_timestamp-date2 > 113666279.31145096:
         data_bank.over_90_days = True
-        while count < len(prices):
+        while count < len(total_volumes):
             data_bank.data.append(
                 tuple((
                     date1,
@@ -89,3 +64,44 @@ def update_data(dates: str):
             )
             date1 += 86400
             count += 1
+    else:
+        if (date2-reducer)-date1 <= 86400:
+            data_bank.one_day = True
+            while count < len(total_volumes):
+                data_bank.data.append(
+                    tuple((
+                        date1,
+                        prices[count],
+                        total_volumes[count],
+                        dates
+                    ))
+                )
+                date1 += 3600
+                count += 1
+
+        elif (date2-reducer)-date1 <= 7862400:
+            data_bank.under_90_days = True
+            while count < len(total_volumes):
+                data_bank.data.append(
+                    tuple((
+                        date1,
+                        prices[count],
+                        total_volumes[count],
+                        dates
+                    ))
+                )
+                date1 += 3600
+                count += 1
+        else:
+            data_bank.over_90_days = True
+            while count < len(total_volumes):
+                data_bank.data.append(
+                    tuple((
+                        date1,
+                        prices[count],
+                        total_volumes[count],
+                        dates
+                    ))
+                )
+                date1 += 86400
+                count += 1

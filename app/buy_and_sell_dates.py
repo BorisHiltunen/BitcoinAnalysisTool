@@ -19,7 +19,7 @@ def get_best_days_trading_days():
     both = (
         ('buy', 1637971200.0, 1000000000.0, 24),
         ('sell', 1637971200.0, 0.0),
-        0.0
+        -1000000000.0
         )
 
     if data_bank.incorrect_input:
@@ -52,6 +52,16 @@ def get_best_days_trading_days():
                 int(both[0][2]),
                 int(both[1][2]),
                 both[2]
+            ))
+        )
+
+    if both[0][1] == 1637971200.0:
+        text = "Something went wrong"
+
+        return incorrect_input_json_formatter.incorrect_input_to_json_form(
+            tuple((
+                text,
+                [data_bank.data[0][3]]
             ))
         )
 

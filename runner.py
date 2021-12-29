@@ -4,10 +4,10 @@ Also the application will be run from here.
 """
 
 from flask import Flask, jsonify
-import data_updater
-import downward_trend
-import highest_trading_volume
-import buy_and_sell_dates
+from app import data_updater
+from app import downward_trend
+from app import highest_trading_volume
+from app import buy_and_sell_dates
 
 app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = False

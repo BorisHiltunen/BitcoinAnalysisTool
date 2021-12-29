@@ -3,14 +3,14 @@ buy_and_sell_dates.py:
 Contains function that returns the best days to buy and sell bitcoin.
 """
 
-import incorrect_input_json_formatter
-import sum_difference_iterator
-from timestamp_engine import TimeForm
-from buy_and_sell_dates_json_formatter import TradingFormatter
-import __init__
+from app.helpers import timestamp_engine
+from app import sum_difference_iterator
+from app.json_formatters import incorrect_input_json_formatter
+from app.json_formatters import buy_and_sell_dates_json_formatter
+from app import data_bank
 
-timeform = TimeForm()
-trading_formatter = TradingFormatter()
+timeform = timestamp_engine.TimeForm()
+trading_formatter = buy_and_sell_dates_json_formatter.TradingFormatter()
 
 
 def get_best_days_trading_days():
@@ -22,13 +22,13 @@ def get_best_days_trading_days():
         0.0
         )
 
-    if __init__.incorrect_input:
+    if data_bank.incorrect_input:
         text = "Incorrect input"
 
         return incorrect_input_json_formatter.incorrect_input_to_json_form(
             tuple((
                 text,
-                __init__.data
+                data_bank.data
             ))
         )
 
@@ -36,15 +36,15 @@ def get_best_days_trading_days():
         if difference[2] > both[2]:
             both = difference
 
-    if __init__.one_day:
+    if data_bank.one_day:
         text = ("Don't buy unless you want to sell on the same day")
 
         return trading_formatter.trading_on_the_same_day_to_json_form(
             tuple((
                 text,
-                __init__.data[0][3],
-                __init__.data[0][3][:10],
-                __init__.data[0][3][11:],
+                data_bank.data[0][3],
+                data_bank.data[0][3][:10],
+                data_bank.data[0][3][11:],
                 str(timeform.get_date_from_timestamp(both[0][1]))[:10],
                 str(timeform.get_date_from_timestamp(both[1][1]))[:10],
                 str(timeform.get_date_from_timestamp(both[0][1]))[11:],
@@ -61,9 +61,9 @@ def get_best_days_trading_days():
         return trading_formatter.buy_and_sell_dates_to_json_form(
             tuple((
                 text,
-                __init__.data[0][3],
-                __init__.data[0][3][:10],
-                __init__.data[0][3][11:],
+                data_bank.data[0][3],
+                data_bank.data[0][3][:10],
+                data_bank.data[0][3][11:],
                 str(timeform.get_date_from_timestamp(both[0][1]))[:10],
                 str(timeform.get_date_from_timestamp(both[1][1]))[:10],
                 str(timeform.get_date_from_timestamp(both[0][1]))[11:],
@@ -82,9 +82,9 @@ def get_best_days_trading_days():
         return trading_formatter.buy_and_sell_dates_to_json_form(
             tuple((
                 text,
-                __init__.data[0][3],
-                __init__.data[0][3][:10],
-                __init__.data[0][3][11:],
+                data_bank.data[0][3],
+                data_bank.data[0][3][:10],
+                data_bank.data[0][3][11:],
                 str(timeform.get_date_from_timestamp(both[0][1]))[:10],
                 str(timeform.get_date_from_timestamp(both[1][1]))[:10],
                 str(timeform.get_date_from_timestamp(both[0][1]))[11:],

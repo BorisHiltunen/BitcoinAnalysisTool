@@ -1,19 +1,19 @@
 """price_iterator.py: Contains one helper function."""
 
-import __init__
+from app import data_bank
 
 
 def get_highest_prices(timestamp):
     """Helper function that returns the highest prices as a list."""
 
-    highest = (__init__.data[0][0], 0.0)
+    highest = (data_bank.data[0][0], 0.0)
     prices = []
     count = 0
 
-    for price in __init__.data:
+    for price in data_bank.data:
         if price[0] - timestamp == 86400:
             prices.append(highest)
-            highest = (__init__.data[count][0], 0.0)
+            highest = (data_bank.data[count][0], 0.0)
             timestamp = price[0]
         else:
             if price[1] > highest[1]:

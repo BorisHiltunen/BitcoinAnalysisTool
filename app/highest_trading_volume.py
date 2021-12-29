@@ -30,7 +30,7 @@ def get_highest_trading_volume():
             highest = (volume[0], volume[2])
 
     text = (f"Highest trading volume date: "
-            f"{timeform.get_date_from_timestamp(highest[0])[11:]}, "
+            f"{timeform.get_date_from_timestamp(highest[0])[:10]}, "
             f"Highest trading volume: {highest[1]}")
 
     return trading_volume_json_formatter.highest_trading_volume_to_json_form(

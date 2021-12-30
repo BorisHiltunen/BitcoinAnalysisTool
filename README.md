@@ -83,11 +83,11 @@ localhost:5000/
     
     ```python 
         {
-            "text": "In bitcoin's historical data from CoinGecko, the price decreased 3 days in a row from 2021-11-25 to 2021-11-27",
+            "text":"In bitcoin's historical data from CoinGecko, the price decreased 3 days in a row from 2021-11-25 to 2021-11-27",
             "data": {
-                "input": "25-11-2021|30-11-2021",
-                "first_date": "25-11-2021",
-                "second_date": "30-11-2021",
+                "input":"2021-11-25|2021-11-30",
+                "first_date":"2021-11-25",
+                "second_date":"2021-11-30",
                 "downward_trend_start_date": "2021-11-25",
                 "downward_trend_end_date": "2021-11-27",
                 "days": 3
@@ -105,11 +105,11 @@ localhost:5000/
     
     ```python 
         {
-            "text": "Highest trading volume date: 15:00:00, Highest trading volume: 37420994605.317085",
+            "text": "Highest trading volume date: 2021-11-26, Highest trading volume: 37420994605.317085",
             "data": {
-                "input": "25-11-2021|30-11-2021",
-                "first_date": "25-11-2021",
-                "second_date": "30-11-2021",
+                "input": "2021-11-25|2021-11-30",
+                "first_date": "2021-11-25",
+                "second_date": "2021-11-30",
                 "highest_trading_volume_date": "2021-11-26",
                 "highest_trading_volume_time": "15:00:00",
                 "highest_trading_volume": 37420994605.317085
@@ -131,18 +131,19 @@ localhost:5000/
     
     ```python 
         {
-            "text": "Buy date: 2021-11-27, Sell date: 2021-11-29",
+            "text": "Buy date: 2021-11-27, Sell date: 2021-11-25",
             "data": {
-                "input": "25-11-2021|30-11-2021",
-                "first_date": "25-11-2021",
-                "second_date": "30-11-2021",
+                "input": "2021-11-25|2021-11-30",
+                "first_date": "2021-11-25",
+                "second_date": "2021-11-30",
                 "buy_date": "2021-11-27",
-                "sell_date": "2021-11-29",
+                "sell_date": "2021-11-25",
                 "buy_time": "00:00:00",
-                "sell_time": "19:00:00",
+                "sell_time": "18:00:00",
                 "buy_price": 47551,
-                "sell_price": 52161,
-                "profit": 4610.8124336957335
+                "sell_price": 52814,
+                "profit": 5263.345551691731
             }
         }
+
     ```

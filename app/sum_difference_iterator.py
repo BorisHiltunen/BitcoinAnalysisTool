@@ -18,34 +18,30 @@ def get_sum_differences():
     while count < len(data_bank.data):
         lowest = ("buy", data_bank.data[0][0], 1000000000, 0)
 
-        while index < len(data_bank.data):
+        for index, price in enumerate(data_bank.data):
             if index in data_bank.buy_date_indices:
                 index += 1
                 continue
             else:
-                if data_bank.data[index][1] < lowest[2]:
+                if price[1] < lowest[2]:
                     lowest = (
                         "buy",
-                        data_bank.data[index][0],
-                        data_bank.data[index][1],
+                        price[0],
+                        price[1],
                         index
                         )
             index += 1
 
-        index = 0
+        index = lowest[3]
         highest = ("sell", lowest[1], -1000000000)
 
-        while index < len(data_bank.data):
-            if index < lowest[3]:
-                index += 1
-                continue
-            else:
-                if data_bank.data[index][1] > highest[2]:
-                    highest = (
-                        "sell",
-                        data_bank.data[index][0],
-                        data_bank.data[index][1]
-                        )
+        for index, price in enumerate(data_bank.data):
+            if price[1] > highest[2]:
+                highest = (
+                    "sell",
+                    price[0],
+                    price[1]
+                    )
             index += 1
         data_bank.buy_date_indices.append(count)
         index = 0

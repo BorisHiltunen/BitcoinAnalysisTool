@@ -13,6 +13,7 @@ MarkupSafe==2.0.1
 mccabe==0.6.1
 pep8==1.7.1
 platformdirs==2.4.1
+pycodestyle==2.8.0
 pycoingecko==2.2.0
 pylint==2.12.2
 requests==2.26.0

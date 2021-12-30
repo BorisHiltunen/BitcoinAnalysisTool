@@ -52,7 +52,12 @@ def update_data(dates: str):
         total_volumes.append(volume[1])
 
     if now_timestamp-date2 > 113666279.31145096:
-        data_bank.over_90_days = True
+        if (date2-reducer)-date1 <= 86400:
+            data_bank.one_day = True
+        elif (date2-reducer)-date1 <= 7862400:
+            data_bank.under_90_days = True
+        else:
+            data_bank.over_90_days = True
         while count < len(total_volumes):
             data_bank.data.append(
                 tuple((

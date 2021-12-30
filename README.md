@@ -15,11 +15,14 @@ Boris Hiltunen ([BorisHiltunen](https://github.com/BorisHiltunen))
 ## Setup
 - Clone or fork the repository.
 
+- Install virtualenv if not already
+-> (pip install virtualenv)
+
 - Make an Virtual Environment
--> (virtualenv env)
+-> (virtualenv env Mac)
 
 - Access it
--> (.\env\Scripts\activate)
+-> (Windows -> .\env\Scripts\activate -> Mac source env/bin/activate)
 
 - Install requirements.txt
 -> (pip install -r requirements.txt)

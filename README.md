@@ -79,7 +79,7 @@ localhost:5000/
     Returns downward trend data in JSON form 
     ```
     
-    For example: localhost:5000/get/downward_trend/25-11-2021|30-11-2021/
+    For example: localhost:5000/get/downward_trend/2021-11-25|2021-11-30/
     
     ```python 
         {
@@ -101,7 +101,7 @@ localhost:5000/
     Returns highest trading volume data in JSON form
     ```
     
-    For example: localhost:5000/get/highest_trading_volume/25-11-2021|30-11-2021/
+    For example: localhost:5000/get/highest_trading_volume/2021-11-25|2021-11-30/
     
     ```python 
         {
@@ -123,11 +123,11 @@ localhost:5000/
     Returns buy and sell date data in JSON form
     
     Important
-    -> The estimated wait time will be 1 Minute And 14 Seconds.
-       if you try to retrieve data from the start of bitcoin's history to the end
+    -> The estimated wait time will be 1 Minute And 14 Seconds
+       if you try to retrieve data from the start of bitcoin's history to the end.
     ```
 
-    For example: localhost:5000/get/buy_and_sell_dates/25-11-2021|30-11-2021/
+    For example: localhost:5000/get/buy_and_sell_dates/2021-11-25|2021-11-30/
     
     ```python 
         {

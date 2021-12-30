@@ -17,8 +17,8 @@ def get_best_days_trading_days():
     """Function for getting the best days to buy and sell bitcoin."""
 
     both = (
-        ('buy', 1637971200.0, 1000000000.0, 24),
-        ('sell', 1637971200.0, 0.0),
+        ('buy', 0.0, 1000000000.0, 24),
+        ('sell', 0.0, 0.0),
         -1000000000.0
         )
 
@@ -55,7 +55,7 @@ def get_best_days_trading_days():
             ))
         )
 
-    if both[0][1] == 1637971200.0:
+    if both[0][1] == 0.0:
         text = "Something went wrong"
 
         return incorrect_input_json_formatter.incorrect_input_to_json_form(

@@ -362,12 +362,41 @@ class Application:
 
         return self.sums
 
+    def get_sum_differences(self):
+        """
+        Helper function that returns sum differences
+        for buy_and_sell_dates.py.
+        """
+
+        both = {"buy_date": (0, 1000000000), "sell_date": (0, -1000000000), "profit": -1000000000}
+        self.sums = []
+        count = 0
+
+        while count < len(self.data):
+
+            if count == len(self.data)-1:
+                if self.data[count][1] > both["sell_date"][1]:
+                    both["sell_date"] = (self.data[count][0], self.data[count][1])
+                    both["profit"] = both["sell_date"][1] - both["buy_date"][1]
+                self.sums.append(both)
+            else:
+                if self.data[count][1] < both["buy_date"][1]:
+                    both["buy_date"] = (self.data[count][0], self.data[count][1])
+                    both["profit"] = both["sell_date"][1] - both["buy_date"][1]
+                    self.sums.append(both)
+                    both = {"buy_date": (0, 1000000000), "sell_date": (0, -1000000000), "profit": -1000000000}
+                if self.data[count][1] > both["sell_date"][1]:
+                    both["sell_date"] = (self.data[count][0], self.data[count][1])
+            count += 1
+
+        return self.sums
+
     def get_best_days_to_buy_and_sell(self):
         """Function for getting the best days to buy and sell bitcoin."""
 
         both = (
-            ('buy', 1637971200.0, 1000000000.0, 24),
-            ('sell', 1637971200.0, 0.0),
+            ('buy', 0.0, 1000000000.0, 24),
+            ('sell', 0.0, 0.0),
             -1000000000.0
             )
 
@@ -384,6 +413,100 @@ class Application:
         for difference in self.get_price_differences():
             if difference[2] > both[2]:
                 both = difference
+
+        if self.one_day:
+            text = ("Don't buy unless you want to sell on the same day")
+
+            return self.buy_and_sell_dates_to_json_form(
+                tuple((
+                    text,
+                    self.data[0][3],
+                    self.data[0][3][:10],
+                    self.data[0][3][11:],
+                    str(self.get_date_from_timestamp(both[0][1]))[:10],
+                    str(self.get_date_from_timestamp(both[1][1]))[:10],
+                    str(self.get_date_from_timestamp(both[0][1]))[11:],
+                    str(self.get_date_from_timestamp(both[1][1]))[11:],
+                    int(both[0][2]),
+                    int(both[1][2]),
+                    both[2]
+                ))
+            )
+
+        if both[0][1] == 0.0:
+            text = "Something went wrong"
+
+            return self.incorrect_input_to_json_form(
+                tuple((
+                    text,
+                    [self.data[0][3]]
+                ))
+            )
+
+        elif both[2] <= 0:
+            text = "Don't buy"
+
+            return self.buy_and_sell_dates_to_json_form(
+                tuple((
+                    text,
+                    self.data[0][3],
+                    self.data[0][3][:10],
+                    self.data[0][3][11:],
+                    str(self.get_date_from_timestamp(both[0][1]))[:10],
+                    str(self.get_date_from_timestamp(both[1][1]))[:10],
+                    str(self.get_date_from_timestamp(both[0][1]))[11:],
+                    str(self.get_date_from_timestamp(both[1][1]))[11:],
+                    int(both[0][2]),
+                    int(both[1][2]),
+                    both[2]
+                ))
+            )
+        else:
+            text = (f"Buy date: "
+                    f"{self.get_date_from_timestamp(both[0][1])[:10]}, "
+                    f"Sell date: "
+                    f"{self.get_date_from_timestamp(both[1][1])[:10]}")
+
+            return self.buy_and_sell_dates_to_json_form(
+                tuple((
+                    text,
+                    self.data[0][3],
+                    self.data[0][3][:10],
+                    self.data[0][3][11:],
+                    str(self.get_date_from_timestamp(both[0][1]))[:10],
+                    str(self.get_date_from_timestamp(both[1][1]))[:10],
+                    str(self.get_date_from_timestamp(both[0][1]))[11:],
+                    str(self.get_date_from_timestamp(both[1][1]))[11:],
+                    int(both[0][2]),
+                    int(both[1][2]),
+                    both[2]
+                ))
+            )
+
+    def get_best_days_to_buy_and_sell2(self):
+        """Function for getting the best days to buy and sell bitcoin."""
+
+        both = (
+            ('buy', 1637971200.0, 1000000000.0),
+            ('sell', 1637971200.0, 0.0),
+            -1000000000.0
+            )
+
+        if self.incorrect_input:
+            text = "Incorrect input"
+
+            return self.incorrect_input_to_json_form(
+                tuple((
+                    text,
+                    self.data
+                ))
+            )
+
+
+        for difference in self.get_sum_differences():
+            print(difference)
+            #if difference["profit"] > both[2]:
+                #both = difference
 
         if self.one_day:
             text = ("Don't buy unless you want to sell on the same day")
@@ -758,12 +881,15 @@ if __name__ == "__main__":
     # Wrong input test
     # application.update_data("25-11-2021|24-11-2021")
 
+    application.update_data("2021-11-25|2021-11-30")
+
     print("1.")
     print(application.get_downward_trend())
     print("2.")
     print(application.get_highest_trading_volume())
     print("3.")
     print(application.get_best_days_to_buy_and_sell())
+    #print(application.get_best_days_to_buy_and_sell2())
 
     #print("")
 

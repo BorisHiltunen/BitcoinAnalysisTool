@@ -63,7 +63,12 @@ class Application:
             total_volumes.append(volume[1])
 
         if now_timestamp-date2 > 113666279.31145096:
-            self.over_90_days = True
+            if (date2-reducer)-date1 <= 86400:
+                self.one_day = True
+            elif (date2-reducer)-date1 <= 7862400:
+                self.under_90_days = True
+            else:
+                self.over_90_days = True
             while count < len(total_volumes):
                 self.data.append(
                     tuple((
@@ -120,41 +125,8 @@ class Application:
     def get_timestamps_from_input(self, dates: str):
         """Helper function that returns tuple containing two timestamps."""
 
-        count = 0
-
-        year1 = ""
-        month1 = ""
-        day1 = ""
-
-        year2 = ""
-        month2 = ""
-        day2 = ""
-
-        while count < len(dates):
-            if (count == 2 or count == 5 or count == 10
-                    or count == 13 or count == 16):
-                count += 1
-                continue
-            else:
-                if count < 2:
-                    day1 += dates[count]
-                elif count < 5:
-                    month1 += dates[count]
-                elif count < 11:
-                    year1 += dates[count]
-                elif count < 13:
-                    day2 += dates[count]
-                elif count < 16:
-                    month2 += dates[count]
-                elif count < 21:
-                    year2 += dates[count]
-            count += 1
-
-        date1_in_correct_form = f"{year1}-{month1}-{day1}"
-        date2_in_correct_form = f"{year2}-{month2}-{day2}"
-
-        string_to_date1 = datetime.fromisoformat(date1_in_correct_form)
-        string_to_date2 = datetime.fromisoformat(date2_in_correct_form)
+        string_to_date1 = datetime.fromisoformat(dates[:10])
+        string_to_date2 = datetime.fromisoformat(dates[11:])
 
         utc_time1 = string_to_date1.replace(tzinfo=timezone.utc)
         utc_time2 = string_to_date2.replace(tzinfo=timezone.utc)
@@ -771,11 +743,18 @@ class Application:
 if __name__ == "__main__":
     application = Application()
 
+    #Original
     #application.update_data("28-04-2013|28-04-2013")
     #application.update_data("26-11-2021|27-11-2021")
     #application.update_data("01-11-2021|27-11-2021")
     #application.update_data("26-11-2020|27-11-2021")
     #application.update_data("28-04-2013|29-12-2021")
+    #Change
+    #application.update_data("2013-04-28|2013-04-28")
+    #application.update_data("2021-11-26|2021-11-27")
+    #application.update_data("2021-11-01|2021-11-27")
+    #application.update_data("2020-11-26|2021-11-27")
+    #application.update_data("2013-04-28|2021-12-29")
     # Wrong input test
     # application.update_data("25-11-2021|24-11-2021")
 
@@ -786,14 +765,15 @@ if __name__ == "__main__":
     print("3.")
     print(application.get_best_days_to_buy_and_sell())
 
-    print("")
+    #print("")
 
     # print("")
 
     # Funktions used in the application
     # ----------------------------------------------------
     # print("A")
-    #print(application.get_timestamps_from_input("26-11-2021|28-11-2021"))
+    #print(application.get_timestamps_from_input2("26-11-2021|28-11-2021"))
+    #print(application.get_timestamps_from_input("2021-11-26|2021-11-28"))
     # print("B")
     #print(application.get_date_from_timestamp(1257326176))
     # print("C")

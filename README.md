@@ -118,6 +118,10 @@ localhost:5000/
   
     ```python 
     Returns buy and sell date data in JSON form
+    
+    Important
+    -> The estimated wait time will be 1 Minute And 14 Seconds.
+       if you try to retrieve data from the start of bitcoin's history to the end
     ```
 
     For example: localhost:5000/get/buy_and_sell_dates/25-11-2021|30-11-2021/

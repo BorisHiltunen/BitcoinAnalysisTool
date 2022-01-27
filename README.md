@@ -1,4 +1,4 @@
-# Vincit
+# BitcoinAnalysisTool
 
 ## Description
 Vincit Application is a Flask project made with Python. The application returns wanted data in JSON form depending on the given input written in the URL (dates separated by the pipe symbol "|"). 
@@ -52,6 +52,7 @@ Boris Hiltunen ([BorisHiltunen](https://github.com/BorisHiltunen))
 - |   ├── sum_difference_iterator.py
 - ├── env
 - ├── .qitignore
+- ├── main.py
 - ├── README.md
 - ├── requirements
 - ├── runner.py

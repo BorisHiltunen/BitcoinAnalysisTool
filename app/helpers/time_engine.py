@@ -1,4 +1,4 @@
-"""time_engine.py: Contains four helper function."""
+"""time_engine.py: Contains four helper functions."""
 
 from datetime import datetime, timezone
 

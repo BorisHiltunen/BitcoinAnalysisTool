@@ -12,41 +12,55 @@ def get_sum_differences():
     for buy_and_sell_dates.py.
     """
 
+    both = {
+        "buy_price": (0.0, 1000000000.0),
+        "sell_price": (0.0, -1000000000.0),
+        "profit": -1000000000.0
+        }
+    data_bank.sums = []
     count = 0
-    index = 0
 
     while count < len(data_bank.data):
-        lowest = ("buy", data_bank.data[0][0], 1000000000, 0)
-
-        for index, price in enumerate(data_bank.data):
-            if index in data_bank.buy_date_indices:
-                index += 1
-                continue
-            else:
-                if price[1] < lowest[2]:
-                    lowest = (
-                        "buy",
-                        price[0],
-                        price[1],
-                        index
-                        )
-            index += 1
-
-        index = lowest[3]
-        highest = ("sell", lowest[1], -1000000000)
-
-        for index, price in enumerate(data_bank.data):
-            if price[1] > highest[2]:
-                highest = (
-                    "sell",
-                    price[0],
-                    price[1]
+        if count == len(data_bank.data)-1 and \
+                both["sell_price"][0] > both["buy_price"][0]:
+            if data_bank.data[count][1] > both["sell_price"][1]:
+                both["sell_price"] = (
+                    data_bank.data[count][0],
+                    data_bank.data[count][1]
                     )
-            index += 1
-        data_bank.buy_date_indices.append(count)
-        index = 0
+                both["profit"] = both["sell_price"][1] - \
+                    both["buy_price"][1]
+                data_bank.sums.append(both)
+            else:
+                both["profit"] = both["sell_price"][1] - \
+                    both["buy_price"][1]
+                data_bank.sums.append(both)
+        else:
+            if data_bank.data[count][1] < both["buy_price"][1]:
+                if count > 0:
+                    both["profit"] = both["sell_price"][1] - \
+                        both["buy_price"][1]
+                    data_bank.sums.append(both)
+                    both = {
+                        "buy_price": (0.0, 1000000000.0),
+                        "sell_price": (0.0, -1000000000.0),
+                        "profit": -1000000000.0
+                        }
+                    both["buy_price"] = (
+                        data_bank.data[count][0],
+                        data_bank.data[count][1]
+                        )
+                else:
+                    both["buy_price"] = (
+                        data_bank.data[count][0],
+                        data_bank.data[count][1]
+                        )
+            if data_bank.data[count][1] > both["sell_price"][1] and \
+                    data_bank.data[count][0] >= both["buy_price"][0]:
+                both["sell_price"] = (
+                    data_bank.data[count][0],
+                    data_bank.data[count][1]
+                    )
         count += 1
-        total = highest[2]-lowest[2]
-        data_bank.sums.append((lowest, highest, total))
 
     return data_bank.sums

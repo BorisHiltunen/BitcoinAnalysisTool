@@ -1,10 +1,10 @@
 """data_updater.py: Contains function that updates application's data."""
 
 from datetime import datetime, timezone
-from app.helpers import timestamp_engine
+from app.helpers import time_engine
 from app import data_bank
 
-timeform = timestamp_engine.TimeForm()
+timeform = time_engine.TimeForm()
 
 
 def update_data(dates: str):
@@ -23,33 +23,45 @@ def update_data(dates: str):
     data_bank.under_90_days = False
     data_bank.over_90_days = False
 
-    date1 = timeform.get_timestamps_from_input(dates)[0]
-    date2 = timeform.get_timestamps_from_input(dates)[1]
+    now = datetime.now(timezone.utc)
+    now_time = now.replace(tzinfo=timezone.utc)
+    now_timestamp = now_time.timestamp()
 
-    if date1 >= date2 or date1 < 1364428800.0:
+    future_condition1 = now.replace(tzinfo=None) - \
+        timeform.get_date_from_input(dates)[0].replace(tzinfo=None)
+    future_condition2 = now.replace(tzinfo=None) - \
+        timeform.get_date_from_input(dates)[1].replace(tzinfo=None)
+
+    if dates[2] == "-" or str(future_condition1)[0] == "-" or \
+            str(future_condition2)[0] == "-":
         data_bank.incorrect_input = True
         data_bank.data.append(dates)
         return
 
-    now = datetime.now(timezone.utc)
-    now_time = now.replace(tzinfo=timezone.utc)
-    now_timestamp = now_time.timestamp()
+    date1 = timeform.get_timestamps_from_input(dates)[0]
+    date2 = timeform.get_timestamps_from_input(dates)[1]
+
+    if date1 > date2 or date1 < 1364428800.0:
+        data_bank.incorrect_input = True
+        data_bank.data.append(dates)
+        return
 
     if date2 != now_timestamp:
         date2 += 3600
         reducer += 3600
 
-    data = data_bank.cg.get_coin_market_chart_range_by_id(
-        id='bitcoin',
+    data = data_bank.cg.get_coin_market_chart_range_by_id(id='bitcoin',
         vs_currency='eur',
         from_timestamp=date1,
         to_timestamp=date2
         )
 
     for price in data["prices"]:
-        prices.append(price[1])
+        prices.append((price[0], price[1]))
     for volume in data["total_volumes"]:
-        total_volumes.append(volume[1])
+        total_volumes.append((volume[0], volume[1]))
+
+    count = 0
 
     if now_timestamp-date2 > 113666279.31145096:
         if (date2-reducer)-date1 <= 86400:
@@ -61,13 +73,12 @@ def update_data(dates: str):
         while count < len(total_volumes):
             data_bank.data.append(
                 tuple((
-                    date1,
-                    prices[count],
-                    total_volumes[count],
+                    total_volumes[count][0],
+                    prices[count][1],
+                    total_volumes[count][1],
                     dates
                 ))
             )
-            date1 += 86400
             count += 1
     else:
         if (date2-reducer)-date1 <= 86400:
@@ -75,13 +86,12 @@ def update_data(dates: str):
             while count < len(total_volumes):
                 data_bank.data.append(
                     tuple((
-                        date1,
-                        prices[count],
-                        total_volumes[count],
+                        total_volumes[count][0],
+                        prices[count][1],
+                        total_volumes[count][1],
                         dates
                     ))
                 )
-                date1 += 3600
                 count += 1
 
         elif (date2-reducer)-date1 <= 7862400:
@@ -89,24 +99,22 @@ def update_data(dates: str):
             while count < len(total_volumes):
                 data_bank.data.append(
                     tuple((
-                        date1,
-                        prices[count],
-                        total_volumes[count],
+                        total_volumes[count][0],
+                        prices[count][1],
+                        total_volumes[count][1],
                         dates
                     ))
                 )
-                date1 += 3600
                 count += 1
         else:
             data_bank.over_90_days = True
             while count < len(total_volumes):
                 data_bank.data.append(
                     tuple((
-                        date1,
-                        prices[count],
-                        total_volumes[count],
+                        total_volumes[count][0],
+                        prices[count][1],
+                        total_volumes[count][1],
                         dates
                     ))
                 )
-                date1 += 86400
                 count += 1

@@ -60,7 +60,7 @@ def get_buy_and_sell_dates_with_url(dates):
     """
 
     data_updater.update_data(dates)
-    return jsonify(buy_and_sell_dates.get_best_days_trading_days()), 200
+    return jsonify(buy_and_sell_dates.get_best_trading_days()), 200
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 # BitcoinAnalysisTool
 
 ## Description
-Vincit Application is a Flask project made with Python. The application returns wanted data in JSON form depending on the given input written in the URL (dates separated by the pipe symbol "|"). 
+BitcoinAnalysisTool is a Flask project made with Python. The application returns wanted data in JSON form depending on the given input written in the URL (dates separated by the pipe symbol "|"). 
 
 ## Authors
 Boris Hiltunen ([BorisHiltunen](https://github.com/BorisHiltunen))
@@ -15,11 +15,11 @@ Boris Hiltunen ([BorisHiltunen](https://github.com/BorisHiltunen))
 ## Setup
 - Clone or fork the repository.
 
-- Install virtualenv if not already
+- Install virtualenv if not already installed
 -> (pip install virtualenv)
 
 - Make an Virtual Environment
--> (virtualenv env Mac)
+-> (virtualenv env)
 
 - Access it
 -> (Windows -> .\env\Scripts\activate -> Mac source env/bin/activate)
@@ -28,7 +28,7 @@ Boris Hiltunen ([BorisHiltunen](https://github.com/BorisHiltunen))
 -> (pip install -r requirements.txt)
 
 - Run
--> (python runner.py)
+-> (python runner.py or python main.py)
 
 ## Application's structure
 ```GAP
